@@ -1,0 +1,30 @@
+spring:
+  application:
+  name: flyghtt-backend
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    name: ${DB_NAME}
+    hikari:
+      schema: ${DB_SCHEMA}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${spring.datasource.name}?currentSchema=${spring.datasource.hikari.schema},public
+
+  flyway:
+    enabled: true
+    validate-on-migrate: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    database: postgresql
+    open-in-view: false
