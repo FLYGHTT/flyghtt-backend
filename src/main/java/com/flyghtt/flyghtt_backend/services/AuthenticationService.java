@@ -1,13 +1,20 @@
 package com.flyghtt.flyghtt_backend.services;
 
+import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.entities.EmailDetails;
 import com.flyghtt.flyghtt_backend.models.entities.User;
 import com.flyghtt.flyghtt_backend.models.entities.UserDetailsImpl;
+import com.flyghtt.flyghtt_backend.models.requests.LoginRequest;
 import com.flyghtt.flyghtt_backend.models.requests.RegisterRequest;
 import com.flyghtt.flyghtt_backend.models.response.AuthenticationResponse;
 import com.flyghtt.flyghtt_backend.repositories.UserRepository;
+import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +31,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse signUp(RegisterRequest request) {
 
@@ -40,6 +48,25 @@ public class AuthenticationService {
         userRepository.save(user);
 
         var jwtToken = generateTokenWithOtp(UserDetailsImpl.build(user));
+
+        return AuthenticationResponse.builder()
+                .userId(user.getUserId())
+                .token(jwtToken)
+                .emailVerified(user.isEmailVerified())
+                .enabled(user.isEnabled())
+                .build();
+    }
+
+    public AuthenticationResponse login(LoginRequest request) throws UserNotFoundException {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        User user = UserUtil.getLoggedInUser().get();
+
+        var jwtToken = jwtService.generateToken(UserDetailsImpl.build(user));
 
         return AuthenticationResponse.builder()
                 .userId(user.getUserId())

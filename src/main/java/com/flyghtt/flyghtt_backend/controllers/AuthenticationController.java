@@ -1,6 +1,8 @@
 package com.flyghtt.flyghtt_backend.controllers;
 
 
+import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
+import com.flyghtt.flyghtt_backend.models.requests.LoginRequest;
 import com.flyghtt.flyghtt_backend.models.requests.RegisterRequest;
 import com.flyghtt.flyghtt_backend.models.response.AuthenticationResponse;
 import com.flyghtt.flyghtt_backend.services.AuthenticationService;
@@ -21,5 +23,11 @@ public class AuthenticationController {
     public AuthenticationResponse signUp(@RequestBody RegisterRequest request) {
 
         return authenticationService.signUp(request);
+    }
+
+    @PostMapping("login")
+    public AuthenticationResponse login(@RequestBody LoginRequest request) throws UserNotFoundException {
+
+        return authenticationService.login(request);
     }
 }
