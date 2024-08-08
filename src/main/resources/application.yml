@@ -28,3 +28,17 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     database: postgresql
     open-in-view: false
+
+security:
+  jwt:
+    secret-key: ${JWT_SECRET}
+    expiration-time: ${JWT_EXPIRATION}
+
+springdoc:
+  api-docs:
+    enabled: true
+
+server:
+  port: 2005
+  servlet:
+    context-path: /api/v1
