@@ -29,6 +29,18 @@ spring:
     database: postgresql
     open-in-view: false
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: {EMAIL_USERNAME}
+    password: {EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 security:
   jwt:
     secret-key: ${JWT_SECRET}
@@ -39,6 +51,5 @@ springdoc:
     enabled: true
 
 server:
-  port: 2005
   servlet:
     context-path: /api/v1

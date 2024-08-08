@@ -1,8 +1,12 @@
 package com.flyghtt.flyghtt_backend.controllers;
 
 
+import com.flyghtt.flyghtt_backend.models.requests.RegisterRequest;
+import com.flyghtt.flyghtt_backend.models.response.AuthenticationResponse;
+import com.flyghtt.flyghtt_backend.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("authentication/")
 public class AuthenticationController {
 
-    @GetMapping("sign-up")
-    public String signUp() {
+    private final AuthenticationService authenticationService;
 
-        return "Lmao";
+    @PostMapping("sign-up")
+    public AuthenticationResponse signUp(@RequestBody RegisterRequest request) {
+
+        return authenticationService.signUp(request);
     }
 }
