@@ -55,4 +55,10 @@ public class AuthenticationController {
 
         return authenticationService.resetPassword(request, token);
     }
+
+    @PostMapping("change/password")
+    public AppResponse changePassword(@RequestBody PasswordResetRequest request) throws FlyghttException {
+
+        return authenticationService.changePassword(request);
+    }
 }

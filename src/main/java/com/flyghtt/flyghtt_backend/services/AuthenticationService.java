@@ -119,7 +119,7 @@ public class AuthenticationService {
 
         if (request.getConfirmNewPassword().equals(request.getNewPassword())) {
 
-            if (!passwordEncoder.matches(user.getPassword(), request.getNewPassword())) {
+            if (!passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
 
                 user.setPassword(passwordEncoder.encode(request.getNewPassword()));
                 userRepository.save(user);
@@ -136,6 +136,34 @@ public class AuthenticationService {
 
             throw new FlyghttException("Passwords do not match");
         }
+    }
+
+    public AppResponse changePassword(PasswordResetRequest request) throws FlyghttException {
+
+        User user = UserUtil.getLoggedInUser().get();
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+
+            throw new FlyghttException("Incorrect Former Password");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+
+            throw new FlyghttException(("New passwords do not match"));
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+
+            throw new FlyghttException("Old password cannot be the same with new password");
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+
+        return AppResponse.builder()
+                .message("Passwords has been successfully changed")
+                .status(HttpStatus.OK)
+                .build();
     }
 
     private String generateTokenWithOtp(UserDetailsImpl userDetails) {
