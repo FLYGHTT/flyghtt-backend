@@ -1,11 +1,14 @@
 package com.flyghtt.flyghtt_backend.controllers;
 
 
+import com.flyghtt.flyghtt_backend.exceptions.FlyghttException;
 import com.flyghtt.flyghtt_backend.exceptions.OtpException;
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.requests.LoginRequest;
 import com.flyghtt.flyghtt_backend.models.requests.OtpRequest;
+import com.flyghtt.flyghtt_backend.models.requests.PasswordResetRequest;
 import com.flyghtt.flyghtt_backend.models.requests.RegisterRequest;
+import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.AuthenticationResponse;
 import com.flyghtt.flyghtt_backend.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
@@ -41,9 +44,15 @@ public class AuthenticationController {
         return authenticationService.verifyOtp(request, token);
     }
 
-    @GetMapping("reset/password/otp/send")
+    @GetMapping("reset/password/otp")
     public AuthenticationResponse sendOtpForResetPassword() throws UserNotFoundException {
 
         return authenticationService.sendOtpForResetPassword();
+    }
+
+    @PostMapping("reset/password")
+    public AppResponse resetPassword(@RequestBody PasswordResetRequest request, @RequestHeader(name="Authorization") String token) throws FlyghttException {
+
+        return authenticationService.resetPassword(request, token);
     }
 }

@@ -1,5 +1,6 @@
 package com.flyghtt.flyghtt_backend.services;
 
+import com.flyghtt.flyghtt_backend.exceptions.FlyghttException;
 import com.flyghtt.flyghtt_backend.exceptions.OtpException;
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.entities.EmailDetails;
@@ -7,12 +8,15 @@ import com.flyghtt.flyghtt_backend.models.entities.User;
 import com.flyghtt.flyghtt_backend.models.entities.UserDetailsImpl;
 import com.flyghtt.flyghtt_backend.models.requests.LoginRequest;
 import com.flyghtt.flyghtt_backend.models.requests.OtpRequest;
+import com.flyghtt.flyghtt_backend.models.requests.PasswordResetRequest;
 import com.flyghtt.flyghtt_backend.models.requests.RegisterRequest;
+import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.AuthenticationResponse;
 import com.flyghtt.flyghtt_backend.repositories.UserRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -80,24 +84,16 @@ public class AuthenticationService {
 
     public AuthenticationResponse verifyOtp(OtpRequest request, String token) throws UserNotFoundException, OtpException {
 
-        String jwt = token.substring(7);
-        Map<String, Object> claims = jwtService.extractAllClaims(jwt);
-
+        Map<String, Object> claims = extractMapFromJwt(token);
         int otp = (int) claims.get("otp");
         Date expiryDate = new Date(TimeUnit.SECONDS.toMillis((long)claims.get("expiryDate")));
 
         User user = UserUtil.getLoggedInUser().get();
 
-        if (otp == request.getOtp() && !expiryDate.before(new Date())) {
+        throwErrorIfOtpNotValid(otp, request.getOtp(), expiryDate);
 
-            user.setEmailVerified(true);
-            userRepository.save(user);
-        }
-
-        else {
-
-            throw new OtpException();
-        }
+        user.setEmailVerified(true);
+        userRepository.save(user);
 
         return buildResponse(user, jwtService.generateToken(UserDetailsImpl.build(user)));
     }
@@ -109,6 +105,37 @@ public class AuthenticationService {
         String jwt = generateTokenWithOtp(UserDetailsImpl.build(loggedInUser));
 
         return buildResponse(loggedInUser, jwt);
+    }
+
+    public AppResponse resetPassword(PasswordResetRequest request, String token) throws FlyghttException {
+
+        Map<String, Object> claims = extractMapFromJwt(token);
+        int otp = (int) claims.get("otp");
+        Date expiryDate = new Date(TimeUnit.SECONDS.toMillis((long)claims.get("expiryDate")));
+
+        User user = UserUtil.getLoggedInUser().get();
+
+        throwErrorIfOtpNotValid(otp, request.getOtp(), expiryDate);
+
+        if (request.getConfirmNewPassword().equals(request.getNewPassword())) {
+
+            if (!passwordEncoder.matches(user.getPassword(), request.getNewPassword())) {
+
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRepository.save(user);
+
+                return AppResponse.builder()
+                        .message("Password has been successfully reset")
+                        .status(HttpStatus.OK)
+                        .build();
+            } else {
+
+                throw new FlyghttException("Old password cannot be the same with new password");
+            }
+        } else {
+
+            throw new FlyghttException("Passwords do not match");
+        }
     }
 
     private String generateTokenWithOtp(UserDetailsImpl userDetails) {
@@ -146,5 +173,19 @@ public class AuthenticationService {
                 .enabled(user.isEnabled())
                 .role(user.getRole())
                 .build();
+    }
+
+    private Map<String, Object> extractMapFromJwt(String token) {
+
+        String jwt = token.substring(7);
+        return jwtService.extractAllClaims(jwt);
+    }
+
+    private void throwErrorIfOtpNotValid(int otp, int requestOtp, Date expiryDate) throws OtpException {
+
+        if (!(otp == requestOtp && !expiryDate.before(new Date()))) {
+
+            throw new OtpException();
+        }
     }
 }
