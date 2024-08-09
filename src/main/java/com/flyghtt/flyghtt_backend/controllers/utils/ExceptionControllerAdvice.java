@@ -3,6 +3,7 @@ package com.flyghtt.flyghtt_backend.controllers.utils;
 
 import com.flyghtt.flyghtt_backend.exceptions.EntityNotFoundException;
 
+import com.flyghtt.flyghtt_backend.exceptions.OtpException;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
-public class ControllerAdvice {
+public class ExceptionControllerAdvice {
 
     @ExceptionHandler({EntityNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -21,6 +22,17 @@ public class ControllerAdvice {
         log.error("An error occurred while handling your request " + exception);
         return AppResponse.builder()
                 .status(HttpStatus.NOT_FOUND)
+                .message(exception.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler({OtpException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public AppResponse handleOtpException(OtpException exception) {
+
+        log.error("An error occurred while handling your request " + exception);
+        return AppResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
                 .message(exception.getMessage())
                 .build();
     }

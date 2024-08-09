@@ -2,6 +2,7 @@ package com.flyghtt.flyghtt_backend.services.utils;
 
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.entities.User;
+import com.flyghtt.flyghtt_backend.models.entities.UserDetailsImpl;
 import lombok.experimental.UtilityClass;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,7 +18,19 @@ public class UserUtil {
         if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
             throw new UserNotFoundException();
         }
-        return Optional.of ((User) authentication.getPrincipal());
+         UserDetailsImpl userDetails = ((UserDetailsImpl) authentication.getPrincipal());
+
+        return Optional.of (User.builder()
+                .firstName(userDetails.getFirstName())
+                .lastName(userDetails.getLastName())
+                .email(userDetails.getEmail())
+                .emailVerified(userDetails.isEmailVerified())
+                .enabled(userDetails.isEnabled())
+                .password(userDetails.getPassword())
+                .userId(userDetails.getUserId())
+                .role(userDetails.getRole())
+                .followers(userDetails.getFollowers())
+                .build());
     }
 
     public boolean hasRole(String roleName) throws UserNotFoundException {

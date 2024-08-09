@@ -1,6 +1,7 @@
 package com.flyghtt.flyghtt_backend.models.response;
 
 
+import com.flyghtt.flyghtt_backend.models.entities.Role;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,4 +15,5 @@ public class AuthenticationResponse {
     private String token;
     private boolean emailVerified;
     private boolean enabled;
+    private Role role;
 }
