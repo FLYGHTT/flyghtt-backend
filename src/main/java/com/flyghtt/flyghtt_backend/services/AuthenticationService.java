@@ -102,6 +102,15 @@ public class AuthenticationService {
         return buildResponse(user, jwtService.generateToken(UserDetailsImpl.build(user)));
     }
 
+    public AuthenticationResponse sendOtpForResetPassword() throws UserNotFoundException {
+
+        User loggedInUser = UserUtil.getLoggedInUser().get();
+
+        String jwt = generateTokenWithOtp(UserDetailsImpl.build(loggedInUser));
+
+        return buildResponse(loggedInUser, jwt);
+    }
+
     private String generateTokenWithOtp(UserDetailsImpl userDetails) {
 
         Random random = new Random();
