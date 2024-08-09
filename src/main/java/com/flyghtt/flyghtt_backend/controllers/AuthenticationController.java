@@ -13,6 +13,7 @@ import com.flyghtt.flyghtt_backend.models.response.AuthenticationResponse;
 import com.flyghtt.flyghtt_backend.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -44,10 +45,10 @@ public class AuthenticationController {
         return authenticationService.verifyOtp(request, token);
     }
 
-    @GetMapping("reset/password/otp")
-    public AuthenticationResponse sendOtpForResetPassword() throws UserNotFoundException {
+    @GetMapping("reset/password/otp/{email}")
+    public AuthenticationResponse sendOtpForResetPassword(@PathVariable String email) throws UserNotFoundException {
 
-        return authenticationService.sendOtpForResetPassword();
+        return authenticationService.sendOtpForResetPassword(email);
     }
 
     @PostMapping("reset/password")

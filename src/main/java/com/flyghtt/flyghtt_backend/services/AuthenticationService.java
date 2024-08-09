@@ -98,13 +98,13 @@ public class AuthenticationService {
         return buildResponse(user, jwtService.generateToken(UserDetailsImpl.build(user)));
     }
 
-    public AuthenticationResponse sendOtpForResetPassword() throws UserNotFoundException {
+    public AuthenticationResponse sendOtpForResetPassword(String email) throws UserNotFoundException {
 
-        User loggedInUser = UserUtil.getLoggedInUser().get();
+        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
-        String jwt = generateTokenWithOtp(UserDetailsImpl.build(loggedInUser));
+        String jwt = generateTokenWithOtp(UserDetailsImpl.build(user));
 
-        return buildResponse(loggedInUser, jwt);
+        return buildResponse(user, jwt);
     }
 
     public AppResponse resetPassword(PasswordResetRequest request, String token) throws FlyghttException {
