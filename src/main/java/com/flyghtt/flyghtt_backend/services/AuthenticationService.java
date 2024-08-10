@@ -2,18 +2,24 @@ package com.flyghtt.flyghtt_backend.services;
 
 import com.flyghtt.flyghtt_backend.exceptions.FlyghttException;
 import com.flyghtt.flyghtt_backend.exceptions.OtpException;
+import com.flyghtt.flyghtt_backend.exceptions.OtpNotFoundException;
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.entities.EmailDetails;
+import com.flyghtt.flyghtt_backend.models.entities.UserOtp;
 import com.flyghtt.flyghtt_backend.models.entities.User;
 import com.flyghtt.flyghtt_backend.models.entities.UserDetailsImpl;
+import com.flyghtt.flyghtt_backend.models.requests.ChangePasswordRequest;
 import com.flyghtt.flyghtt_backend.models.requests.LoginRequest;
 import com.flyghtt.flyghtt_backend.models.requests.OtpRequest;
 import com.flyghtt.flyghtt_backend.models.requests.PasswordResetRequest;
 import com.flyghtt.flyghtt_backend.models.requests.RegisterRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.AuthenticationResponse;
+import com.flyghtt.flyghtt_backend.models.response.VerifyOtpResponse;
+import com.flyghtt.flyghtt_backend.repositories.UserOtpRepository;
 import com.flyghtt.flyghtt_backend.repositories.UserRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.http.HttpStatus;
@@ -25,10 +31,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 @Service
@@ -39,7 +43,9 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
+    private final UserOtpRepository userOtpRepository;
 
+    @Transactional
     public AuthenticationResponse signUp(RegisterRequest request) {
 
         User user = User.builder()
@@ -54,11 +60,14 @@ public class AuthenticationService {
 
         userRepository.save(user);
 
-        var jwtToken = generateTokenWithOtp(UserDetailsImpl.build(user));
+        var jwtToken = jwtService.generateToken(UserDetailsImpl.build(user));
+
+        generateOtp(user);
 
         return buildResponse(user, jwtToken);
     }
 
+    @Transactional
     public AuthenticationResponse login(LoginRequest request) throws UserNotFoundException {
 
         Authentication authentication = authenticationManager.authenticate(
@@ -68,54 +77,45 @@ public class AuthenticationService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User user = UserUtil.getLoggedInUser().get();
 
-        String jwtToken;
-
         if (!user.isEmailVerified()) {
 
-            jwtToken = generateTokenWithOtp(UserDetailsImpl.build(user));
-        } else {
-
-            jwtToken = jwtService.generateToken(UserDetailsImpl.build(user));
+            generateOtp(user);
         }
+        String jwtToken = jwtService.generateToken(UserDetailsImpl.build(user));
 
         return buildResponse(user, jwtToken);
     }
 
-
-    public AuthenticationResponse verifyOtp(OtpRequest request, String token) throws UserNotFoundException, OtpException {
-
-        Map<String, Object> claims = extractMapFromJwt(token);
-        int otp = (int) claims.get("otp");
-        Date expiryDate = new Date(TimeUnit.SECONDS.toMillis((long)claims.get("expiryDate")));
+    @Transactional
+    public VerifyOtpResponse verifyOtp(OtpRequest request) throws UserNotFoundException, OtpException, OtpNotFoundException {
 
         User user = UserUtil.getLoggedInUser().get();
 
-        throwErrorIfOtpNotValid(otp, request.getOtp(), expiryDate);
+        UserOtp otp = userOtpRepository.findByUserId(user.getUserId()).orElseThrow(OtpNotFoundException::new);
+
+        throwErrorIfOtpNotValid(otp, request.getOtp());
+
+        userOtpRepository.deleteAllByUserId(user.getUserId());
 
         user.setEmailVerified(true);
         userRepository.save(user);
 
-        return buildResponse(user, jwtService.generateToken(UserDetailsImpl.build(user)));
+        return VerifyOtpResponse.builder()
+                .userId(user.getUserId())
+                .enabled(user.isEnabled())
+                .emailVerified(user.isEmailVerified())
+                .role(user.getRole())
+                .build();
     }
 
-    public AuthenticationResponse sendOtpForResetPassword(String email) throws UserNotFoundException {
+    @Transactional
+    public AppResponse resetPassword(PasswordResetRequest request) throws FlyghttException {
 
-        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(UserNotFoundException::new);
 
-        String jwt = generateTokenWithOtp(UserDetailsImpl.build(user));
+        UserOtp userOtp = userOtpRepository.findByUserId(user.getUserId()).orElseThrow(OtpNotFoundException::new);
 
-        return buildResponse(user, jwt);
-    }
-
-    public AppResponse resetPassword(PasswordResetRequest request, String token) throws FlyghttException {
-
-        Map<String, Object> claims = extractMapFromJwt(token);
-        int otp = (int) claims.get("otp");
-        Date expiryDate = new Date(TimeUnit.SECONDS.toMillis((long)claims.get("expiryDate")));
-
-        User user = UserUtil.getLoggedInUser().get();
-
-        throwErrorIfOtpNotValid(otp, request.getOtp(), expiryDate);
+        throwErrorIfOtpNotValid(userOtp, request.getOtp());
 
         if (request.getConfirmNewPassword().equals(request.getNewPassword())) {
 
@@ -138,7 +138,8 @@ public class AuthenticationService {
         }
     }
 
-    public AppResponse changePassword(PasswordResetRequest request) throws FlyghttException {
+    @Transactional
+    public AppResponse changePassword(ChangePasswordRequest request) throws FlyghttException {
 
         User user = UserUtil.getLoggedInUser().get();
 
@@ -166,26 +167,26 @@ public class AuthenticationService {
                 .build();
     }
 
-    private String generateTokenWithOtp(UserDetailsImpl userDetails) {
+    @Transactional
+    public AppResponse sendOtpToMailService(String email) throws UserNotFoundException {
 
-        Random random = new Random();
-        int otp = random.nextInt(100000, 1000000);
-        Date expiryDate = DateUtils.addMinutes(new Date(), 15);
+        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("otp", otp);
-        extraClaims.put("expiryDate", expiryDate);
+        int otp = generateOtp(user);
 
-        sendOtpToMail(otp, userDetails.getEmail());
+        sendOtpToMail(otp, user.getEmail());
 
-        return jwtService.generateToken(extraClaims, userDetails);
+        return AppResponse.builder()
+                .message("OTP has been successfully sent")
+                .status(HttpStatus.OK)
+                .build();
     }
 
     private void sendOtpToMail(int otp, String recipientEmail) {
 
         emailService.sendSimpleMail(
                 EmailDetails.builder()
-                        .messageBody(Integer.toString(otp))
+                        .messageBody("Your OTP for FLYGHTT is " + otp)
                         .subject("Your OTP for FLYGHTT")
                         .recipient(recipientEmail)
                         .build()
@@ -209,11 +210,32 @@ public class AuthenticationService {
         return jwtService.extractAllClaims(jwt);
     }
 
-    private void throwErrorIfOtpNotValid(int otp, int requestOtp, Date expiryDate) throws OtpException {
+    private void throwErrorIfOtpNotValid(UserOtp userOtp, int requestOtp) throws OtpException {
 
-        if (!(otp == requestOtp && !expiryDate.before(new Date()))) {
+        if (!(userOtp.getOtp() == requestOtp && !userOtp.getExpiryDate().before(new Date()))) {
 
             throw new OtpException();
         }
+    }
+
+    private int generateOtp(User user) {
+
+        Random random = new Random();
+        int pin = random.nextInt(100000, 1000000);
+
+        userOtpRepository.deleteAllByUserId(user.getUserId());
+        userOtpRepository.flush();
+
+        UserOtp userOtp = UserOtp.builder()
+                .otp(pin)
+                .userId(user.getUserId())
+                .expiryDate(DateUtils.addMinutes(new Date(), 15))
+                .build();
+
+        userOtpRepository.save(userOtp);
+
+        sendOtpToMail(pin, user.getEmail());
+
+        return pin;
     }
 }

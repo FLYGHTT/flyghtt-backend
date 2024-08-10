@@ -22,3 +22,14 @@ create table if not exists user_followers (
     constraint fk_user_followers_follower_id foreign key (follower_id)
                                           references users(user_id)
 );
+
+create table if not exists user_otps (
+
+    id serial primary key,
+    otp int not null,
+    expiry_date timestamp not null,
+    user_id uuid not null unique,
+
+    constraint fk_user_otp_user_id foreign key (user_id)
+                                    references users(user_id)
+);

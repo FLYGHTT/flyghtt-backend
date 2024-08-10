@@ -3,13 +3,16 @@ package com.flyghtt.flyghtt_backend.controllers;
 
 import com.flyghtt.flyghtt_backend.exceptions.FlyghttException;
 import com.flyghtt.flyghtt_backend.exceptions.OtpException;
+import com.flyghtt.flyghtt_backend.exceptions.OtpNotFoundException;
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
+import com.flyghtt.flyghtt_backend.models.requests.ChangePasswordRequest;
 import com.flyghtt.flyghtt_backend.models.requests.LoginRequest;
 import com.flyghtt.flyghtt_backend.models.requests.OtpRequest;
 import com.flyghtt.flyghtt_backend.models.requests.PasswordResetRequest;
 import com.flyghtt.flyghtt_backend.models.requests.RegisterRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.AuthenticationResponse;
+import com.flyghtt.flyghtt_backend.models.response.VerifyOtpResponse;
 import com.flyghtt.flyghtt_backend.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,25 +43,25 @@ public class AuthenticationController {
     }
 
     @PostMapping("verify/otp")
-    public AuthenticationResponse verifyOtp(@RequestBody OtpRequest request, @RequestHeader(name="Authorization") String token) throws UserNotFoundException, OtpException {
+    public VerifyOtpResponse verifyOtp(@RequestBody OtpRequest request) throws UserNotFoundException, OtpException, OtpNotFoundException {
 
-        return authenticationService.verifyOtp(request, token);
+        return authenticationService.verifyOtp(request);
     }
 
-    @GetMapping("reset/password/otp/{email}")
-    public AuthenticationResponse sendOtpForResetPassword(@PathVariable String email) throws UserNotFoundException {
+    @GetMapping("send/otp/{email}")
+    public AppResponse sendOtpToMail(@PathVariable String email) throws UserNotFoundException {
 
-        return authenticationService.sendOtpForResetPassword(email);
+        return authenticationService.sendOtpToMailService(email);
     }
 
     @PostMapping("reset/password")
-    public AppResponse resetPassword(@RequestBody PasswordResetRequest request, @RequestHeader(name="Authorization") String token) throws FlyghttException {
+    public AppResponse resetPassword(@RequestBody PasswordResetRequest request) throws FlyghttException {
 
-        return authenticationService.resetPassword(request, token);
+        return authenticationService.resetPassword(request);
     }
 
     @PostMapping("change/password")
-    public AppResponse changePassword(@RequestBody PasswordResetRequest request) throws FlyghttException {
+    public AppResponse changePassword(@RequestBody ChangePasswordRequest request) throws FlyghttException {
 
         return authenticationService.changePassword(request);
     }
