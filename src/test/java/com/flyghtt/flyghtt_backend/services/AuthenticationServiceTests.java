@@ -26,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
@@ -147,7 +148,7 @@ public class AuthenticationServiceTests {
         // verify
         verify(userRepository, times(1)).findByEmail(user.getEmail());
         verify(userOtpRepository, times(1)).findByUserId(user.getUserId());
-        verify(passwordEncoder, times(1)).matches(request.getNewPassword(), "password123");
+        verify(passwordEncoder, times(1)).matches(request.getNewPassword(), UserTestData.createNewUser().getPassword());
         verify(passwordEncoder, times(1)).encode(request.getNewPassword());
         verify(userRepository, times(1)).save(user);
 
@@ -156,5 +157,43 @@ public class AuthenticationServiceTests {
     }
 
     @Test
-    void can
+    void canChangePassword() throws FlyghttException {
+
+        // given
+        var user = UserTestData.getLoggedInUser().get();
+        var request = UserTestData.createChangePasswordRequest();
+
+        // when
+        when(passwordEncoder.matches(request.getOldPassword(), user.getPassword())).thenReturn(true);
+        when(passwordEncoder.matches(request.getNewPassword(), user.getPassword())).thenReturn(false);
+        when(passwordEncoder.encode(user.getPassword())).thenReturn("HASHED PASSWORD");
+        when(userRepository.save(any())).thenReturn(user);
+
+        authenticationService.changePassword(request);
+
+        verify(passwordEncoder, times(1)).matches(request.getOldPassword(), UserTestData.createNewUser().getPassword());
+        verify(passwordEncoder, times(1)).matches(request.getNewPassword(), UserTestData.createNewUser().getPassword());
+        verify(passwordEncoder, times(1)).encode(user.getPassword());
+        verify(userRepository, times(1)).save(any());
+    }
+
+    @Test
+    void canSendOtpToMail() throws UserNotFoundException {
+
+        // given
+        var user = UserTestData.createNewUser();
+        var userOtp = UserTestData.createNewUserOtp();
+
+        // when
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(userOtpRepository.save(any())).thenReturn(userOtp);
+
+        authenticationService.sendOtpToMailService(user.getEmail());
+
+        verify(userRepository, times(1)).findByEmail(user.getEmail());
+        verify(userOtpRepository, times(1)).deleteAllByUserId(user.getUserId());
+        verify(userOtpRepository, times(1)).flush();
+        verify(userOtpRepository, times(1)).save(any());
+        verify(emailService, times(1)).sendSimpleMail(any());
+    }
 }

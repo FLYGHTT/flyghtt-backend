@@ -172,9 +172,7 @@ public class AuthenticationService {
 
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
-        int otp = generateOtp(user);
-
-        sendOtpToMail(otp, user.getEmail());
+        generateOtp(user);
 
         return AppResponse.builder()
                 .message("OTP has been successfully sent")
