@@ -1,5 +1,8 @@
 package com.flyghtt.flyghtt_backend.services;
 
+import com.flyghtt.flyghtt_backend.exceptions.FlyghttException;
+import com.flyghtt.flyghtt_backend.exceptions.OtpException;
+import com.flyghtt.flyghtt_backend.exceptions.OtpNotFoundException;
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.entities.UserDetailsImpl;
 import com.flyghtt.flyghtt_backend.repositories.UserOtpRepository;
@@ -8,15 +11,20 @@ import com.flyghtt.flyghtt_backend.utils.UserTestData;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -60,7 +68,6 @@ public class AuthenticationServiceTests {
         var user = UserTestData.createNewUser();
         var otp = UserTestData.createNewUserOtp();
         var registerRequest = UserTestData.createNewRegisterRequest();
-        var emailDetails = UserTestData.createNewEmailDetails();
 
         // when
         when(userRepository.save(any())).thenReturn(user);
@@ -97,4 +104,57 @@ public class AuthenticationServiceTests {
 
         assertTrue(response.isEnabled());
     }
+
+    @Test
+    void canVerifyOtp() throws UserNotFoundException, OtpException, OtpNotFoundException {
+
+        // given
+        var user = UserTestData.getLoggedInUser().get();
+        var otp = UserTestData.createNewUserOtp();
+        var otpRequest = UserTestData.createNewOtpRequest();
+
+        // when
+        when(userOtpRepository.findByUserId(user.getUserId())).thenReturn(Optional.of(otp));
+        when(userRepository.save(any())).thenReturn(user);
+
+        var response = authenticationService.verifyOtp(otpRequest);
+
+        // verify
+        Assertions.assertEquals(response.getUserId(), user.getUserId());
+        Assertions.assertTrue(response.isEmailVerified());
+        verify(userRepository, times(1)).save(any());
+        verify(userOtpRepository, times(1)).deleteAllByUserId(user.getUserId());
+        verify(userOtpRepository, times(1)).findByUserId(user.getUserId());
+    }
+
+    @Test
+    void canResetPassword() throws FlyghttException {
+
+        // given
+        var user = UserTestData.createNewUser();
+        var otp = UserTestData.createNewUserOtp();
+        var request = UserTestData.createNewPasswordRequest();
+
+        // when
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(userOtpRepository.findByUserId(user.getUserId())).thenReturn(Optional.of(otp));
+        when(passwordEncoder.matches(request.getNewPassword(), user.getPassword())).thenReturn(false);
+        when(passwordEncoder.encode(request.getNewPassword())).thenReturn("HASHED PASSWORD");
+        when(userRepository.save(user)).thenReturn(user);
+
+        var response = authenticationService.resetPassword(request);
+
+        // verify
+        verify(userRepository, times(1)).findByEmail(user.getEmail());
+        verify(userOtpRepository, times(1)).findByUserId(user.getUserId());
+        verify(passwordEncoder, times(1)).matches(request.getNewPassword(), "password123");
+        verify(passwordEncoder, times(1)).encode(request.getNewPassword());
+        verify(userRepository, times(1)).save(user);
+
+        Assertions.assertEquals(response.getStatus(), HttpStatus.OK);
+        Assertions.assertEquals(user.getPassword(), "HASHED PASSWORD");
+    }
+
+    @Test
+    void can
 }

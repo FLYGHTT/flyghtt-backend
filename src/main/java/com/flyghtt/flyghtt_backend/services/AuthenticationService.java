@@ -212,7 +212,7 @@ public class AuthenticationService {
 
     private void throwErrorIfOtpNotValid(UserOtp userOtp, int requestOtp) throws OtpException {
 
-        if (!(userOtp.getOtp() == requestOtp && !userOtp.getExpiryDate().before(new Date()))) {
+        if (!(userOtp.getOtp() == requestOtp && userOtp.getExpiryDate().before(new Date()))) {
 
             throw new OtpException();
         }

@@ -7,8 +7,11 @@ import com.flyghtt.flyghtt_backend.models.entities.User;
 import com.flyghtt.flyghtt_backend.models.entities.UserDetailsImpl;
 import com.flyghtt.flyghtt_backend.models.entities.UserOtp;
 import com.flyghtt.flyghtt_backend.models.requests.LoginRequest;
+import com.flyghtt.flyghtt_backend.models.requests.OtpRequest;
+import com.flyghtt.flyghtt_backend.models.requests.PasswordResetRequest;
 import com.flyghtt.flyghtt_backend.models.requests.RegisterRequest;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,7 +48,7 @@ public final class UserTestData {
         return UserOtp.builder()
                 .userId(USER_ID)
                 .otp(OTP)
-                .expiryDate(new Date())
+                .expiryDate(DateUtils.addMinutes(new Date(), -12))
                 .id(1)
                 .build();
     }
@@ -93,6 +96,27 @@ public final class UserTestData {
 
         request.setEmail("itzmhizterlouis@gmail.com");
         request.setPassword("password123");
+
+        return request;
+    }
+
+    public static OtpRequest createNewOtpRequest() {
+
+        OtpRequest request = new OtpRequest();
+
+        request.setOtp(OTP);
+
+        return request;
+    }
+
+    public static PasswordResetRequest createNewPasswordRequest() {
+
+        PasswordResetRequest request = new PasswordResetRequest();
+
+        request.setEmail("itzmhizterlouis@gmail.com");
+        request.setOtp(OTP);
+        request.setNewPassword("new password");
+        request.setConfirmNewPassword("new password");
 
         return request;
     }
