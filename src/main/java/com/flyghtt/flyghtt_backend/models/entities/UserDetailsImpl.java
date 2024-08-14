@@ -27,6 +27,17 @@ public class UserDetailsImpl extends User implements UserDetails {
     private boolean enabled;
     private String username;
 
+    @Override
+    public boolean equals(Object user) {
+
+        if (getClass() != user.getClass())
+            return false;
+
+        User user2 = (User) user;
+
+        return userId.equals(user2.getUserId());
+    }
+
     public String getUsername() {
 
         return email;

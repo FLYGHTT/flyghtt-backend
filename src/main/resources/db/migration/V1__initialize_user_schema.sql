@@ -9,7 +9,8 @@ create table if not exists users (
     password varchar(100) not null,
     email_verified boolean default false not null,
     enabled boolean default true not null,
-    role varchar(50) not null
+    role varchar(50) not null,
+    created_at timestamp default now()
 );
 
 create table if not exists user_followers (

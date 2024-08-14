@@ -49,7 +49,7 @@ public final class UserTestData {
         return UserOtp.builder()
                 .userId(USER_ID)
                 .otp(OTP)
-                .expiryDate(DateUtils.addMinutes(new Date(), -12))
+                .expiryDate(DateUtils.addMinutes(new Date(), 12))
                 .id(1)
                 .build();
     }

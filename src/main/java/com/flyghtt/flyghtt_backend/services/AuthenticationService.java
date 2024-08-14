@@ -210,13 +210,15 @@ public class AuthenticationService {
 
     private void throwErrorIfOtpNotValid(UserOtp userOtp, int requestOtp) throws OtpException {
 
-        if (!(userOtp.getOtp() == requestOtp && userOtp.getExpiryDate().before(new Date()))) {
+        if (!(userOtp.getOtp() == requestOtp && new Date().before(userOtp.getExpiryDate()))) {
+
+            System.out.println(userOtp.getExpiryDate().before(new Date()));
 
             throw new OtpException();
         }
     }
 
-    private int generateOtp(User user) {
+    private void generateOtp(User user) {
 
         Random random = new Random();
         int pin = random.nextInt(100000, 1000000);
@@ -233,7 +235,5 @@ public class AuthenticationService {
         userOtpRepository.save(userOtp);
 
         sendOtpToMail(pin, user.getEmail());
-
-        return pin;
     }
 }

@@ -1,5 +1,6 @@
 package com.flyghtt.flyghtt_backend.services.utils;
 
+import com.flyghtt.flyghtt_backend.exceptions.UnauthorizedException;
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.entities.User;
 import com.flyghtt.flyghtt_backend.models.entities.UserDetailsImpl;
@@ -48,5 +49,15 @@ public class UserUtil {
         }
 
         return false;  // The role was not found in the authorities
+    }
+
+    public void throwErrorIfNotUserEmailVerifiedAndEnabled() {
+
+        User user = UserUtil.getLoggedInUser().get();
+
+        if (!user.isEmailVerified() || !user.isEnabled()) {
+
+            throw new UnauthorizedException("Account is not valid (locked or email not verified)");
+        }
     }
 }
