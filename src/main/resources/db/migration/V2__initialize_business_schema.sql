@@ -1,6 +1,6 @@
 create table if not exists businesses (
 
-    business_id uuid primary key,
+    business_id uuid primary key default gen_random_uuid(),
     name varchar(50) not null,
     description varchar(255) not null,
 
@@ -28,7 +28,7 @@ create table if not exists business_employees (
 
 create table if not exists tools (
 
-    tool_id uuid primary key,
+    tool_id uuid primary key default gen_random_uuid(),
     name varchar(50) not null,
     description varchar(255) default null,
     link varchar(255) default null,
@@ -42,7 +42,7 @@ create table if not exists tools (
 
 create table if not exists tool_columns (
 
-    column_id bigserial primary key,
+    column_id uuid primary key default gen_random_uuid(),
     name varchar(50) not null,
     description varchar(255) default null,
     tool_id uuid not null,
@@ -53,10 +53,9 @@ create table if not exists tool_columns (
 
 create table if not exists column_factors (
 
-    column_factor_id bigint primary key,
+    column_factor_id uuid primary key default gen_random_uuid(),
     factor_name varchar(50) not null,
-    factor_description varchar(255) default null,
-    column_id bigint not null,
+    column_id uuid not null,
 
     constraint column_factors_column_id foreign key (column_id)
                                           references tool_columns(column_id)
@@ -64,10 +63,10 @@ create table if not exists column_factors (
 
 create table if not exists factor_values (
 
-    factor_value_id bigint primary key,
+    factor_value_id bigserial primary key,
     factor_value varchar(255) not null,
     business_id uuid not null,
-    column_factor_id bigint not null,
+    column_factor_id uuid not null,
 
     constraint fk_factor_values_factor_value foreign key (column_factor_id)
                                          references column_factors(column_factor_id),

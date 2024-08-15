@@ -24,7 +24,7 @@ public class FactorValue {
     private long factorValueId;
 
     private UUID businessId;
-    private long columnFactorId;
+    private UUID columnFactorId;
 
     private String factorValue;
 }
