@@ -1,34 +1,30 @@
 package com.flyghtt.flyghtt_backend.models.entities;
 
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
+import java.util.UUID;
+
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "factor_columns")
-public class FactorColumn {
+@Table(name = "factor_values")
+public class FactorValue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "factor_column_id")
-    private long factorColumnId;
+    private long factorValueId;
 
-    private String columnName;
-    private String factorName;
+    private UUID businessId;
+    private long columnFactorId;
 
-    @ManyToOne
-    @JoinColumn(name = "tool", nullable = false)
-    private Tool tool;
+    private String factorValue;
 }

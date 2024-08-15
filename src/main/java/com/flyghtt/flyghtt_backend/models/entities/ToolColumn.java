@@ -1,6 +1,8 @@
 package com.flyghtt.flyghtt_backend.models.entities;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
@@ -16,22 +18,17 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "tools")
-public class Tool {
+@Table(name = "tool_columns")
+public class ToolColumn {
 
     @Id
-    @Builder.Default
-    private UUID toolId = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long columnId;
 
     private String name;
     private String description;
-    private String link;
+    private UUID toolId;
 
-    private UUID createdBy;
-
-    @Builder.Default private boolean isPublic = false;
-    @Builder.Default private boolean commentable = true;
-
-    @OneToMany(mappedBy = "toolId")
-    private List<ToolColumn> columns;
+    @OneToMany(mappedBy = "columnId")
+    private List<ColumnFactor> columnFactors;
 }
