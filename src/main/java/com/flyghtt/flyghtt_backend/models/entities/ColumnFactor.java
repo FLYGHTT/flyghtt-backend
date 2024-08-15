@@ -3,6 +3,7 @@ package com.flyghtt.flyghtt_backend.models.entities;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -29,6 +30,6 @@ public class ColumnFactor {
     private String factorName;
     private UUID columnId;
 
-    @OneToMany(mappedBy = "columnFactorId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "columnFactorId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<FactorValue> factorValues;
 }
