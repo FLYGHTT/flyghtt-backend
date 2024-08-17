@@ -10,6 +10,7 @@ import java.util.UUID;
 public interface ToolRepository extends JpaRepository<Tool, Long> {
 
     Optional<Tool> findByToolId(UUID toolId);
+    boolean existsByCreatedBy(UUID createdBy);
     List<Tool> findAllByCreatedBy(UUID createdBy);
     void deleteByToolId(UUID toolId);
 }

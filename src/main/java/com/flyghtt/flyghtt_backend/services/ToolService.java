@@ -1,6 +1,7 @@
 package com.flyghtt.flyghtt_backend.services;
 
 import com.flyghtt.flyghtt_backend.exceptions.ToolNotFoundException;
+import com.flyghtt.flyghtt_backend.exceptions.UnauthorizedException;
 import com.flyghtt.flyghtt_backend.models.entities.Column;
 import com.flyghtt.flyghtt_backend.models.entities.Tool;
 import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
@@ -60,6 +61,8 @@ public class ToolService {
 
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
+        canUserAlterTool();
+
         Tool tool = toolRepository.findByToolId(toolId).orElseThrow(ToolNotFoundException::new);
         tool.setName(request.getToolName().toUpperCase());
         tool.setDescription(request.getToolDescription());
@@ -77,8 +80,12 @@ public class ToolService {
     @Transactional
     public AppResponse deleteTool(UUID toolId) {
 
-        toolRepository.deleteByToolId(toolId);
+        canUserAlterTool();
+
+        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
+
         columnService.deleteAllToolColumns(toolId);
+        toolRepository.deleteByToolId(toolId);
 
         return AppResponse.builder()
                 .status(HttpStatus.OK)
@@ -86,6 +93,10 @@ public class ToolService {
     }
 
     public IdResponse createColumn(UUID toolId, ColumnRequest request) {
+
+        canUserAlterTool();
+
+        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
         Column column = Column.builder()
                 .name(request.getColumnName().toUpperCase())
@@ -103,7 +114,17 @@ public class ToolService {
 
     public List<ColumnResponse> getAllToolColumns(UUID toolId) {
 
+        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
+
         return columnService.getAllByToolId(toolId).parallelStream().map(Column::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public void canUserAlterTool() {
+
+        if (!toolRepository.existsByCreatedBy(UserUtil.getLoggedInUser().get().getUserId())) {
+
+            throw new UnauthorizedException("You're not the creator of this tool");
+        }
     }
 }

@@ -1,10 +1,13 @@
 package com.flyghtt.flyghtt_backend.services;
 
 import com.flyghtt.flyghtt_backend.exceptions.ColumnNotFoundException;
+import com.flyghtt.flyghtt_backend.exceptions.UnauthorizedException;
 import com.flyghtt.flyghtt_backend.models.entities.Column;
 import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.repositories.ColumnRepository;
+import com.flyghtt.flyghtt_backend.repositories.ToolRepository;
+import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,10 +21,11 @@ import java.util.UUID;
 public class ColumnService {
 
     private final ColumnRepository columnRepository;
+    private final ToolRepository toolRepository;
 
-    public Column createColumn(Column column) {
+    public void createColumn(Column column) {
 
-        return columnRepository.save(column);
+        columnRepository.save(column);
     }
 
     public List<Column> getAllByToolId(UUID toolId) {
@@ -31,10 +35,15 @@ public class ColumnService {
 
     public Column getByColumnId(UUID columnId) {
 
+        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
+
         return columnRepository.findByColumnId(columnId).orElseThrow(ColumnNotFoundException::new);
     }
 
     public AppResponse updateColumn(UUID columnId, ColumnRequest request) {
+
+        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
+        canUserAlterTool();
 
         Column column = columnRepository.findByColumnId(columnId).orElseThrow(ColumnNotFoundException::new);
         column.setName(request.getColumnName().toUpperCase());
@@ -51,6 +60,9 @@ public class ColumnService {
     @Transactional
     public AppResponse deleteColumn(UUID columnId) {
 
+        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
+        canUserAlterTool();
+
         columnRepository.deleteByColumnId(columnId);
 
         return AppResponse.builder()
@@ -63,5 +75,13 @@ public class ColumnService {
     void deleteAllToolColumns(UUID toolId) {
 
         columnRepository.deleteAllByToolId(toolId);
+    }
+
+    public void canUserAlterTool() {
+
+        if (!toolRepository.existsByCreatedBy(UserUtil.getLoggedInUser().get().getUserId())) {
+
+            throw new UnauthorizedException("You're not the creator of this tool");
+        }
     }
 }
