@@ -22,6 +22,8 @@ create table if not exists columns (
 
     tool_id uuid not null,
 
+    unique (tool_id, name),
+
     constraint fk_columns_tool_id foreign key (tool_id)
                                    references tools(tool_id)
 );
@@ -32,6 +34,8 @@ create table if not exists factors (
     name varchar(50) not null,
 
     column_id uuid not null,
+
+    unique (column_id, name),
 
     constraint fk_column_factors_column_id foreign key (column_id)
                                           references columns(column_id)

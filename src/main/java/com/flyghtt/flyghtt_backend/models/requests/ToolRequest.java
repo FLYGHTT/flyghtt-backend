@@ -21,7 +21,7 @@ public class ToolRequest {
     public Tool toDb() {
 
         return Tool.builder()
-                .name(toolName)
+                .name(toolName.toUpperCase())
                 .description(toolDescription)
                 .link(link)
                 .commentable(commentable)

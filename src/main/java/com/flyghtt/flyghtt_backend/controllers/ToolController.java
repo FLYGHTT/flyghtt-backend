@@ -1,10 +1,14 @@
 package com.flyghtt.flyghtt_backend.controllers;
 
 
+import com.flyghtt.flyghtt_backend.models.entities.Column;
+import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
 import com.flyghtt.flyghtt_backend.models.requests.ToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
+import com.flyghtt.flyghtt_backend.models.response.ColumnResponse;
 import com.flyghtt.flyghtt_backend.models.response.IdResponse;
 import com.flyghtt.flyghtt_backend.models.response.ToolResponse;
+import com.flyghtt.flyghtt_backend.services.ColumnService;
 import com.flyghtt.flyghtt_backend.services.ToolService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +30,7 @@ import java.util.UUID;
 public class ToolController {
 
     private final ToolService toolService;
+    private final ColumnService columnService;
 
     @PostMapping
     public IdResponse createTool(@RequestBody ToolRequest request) {
@@ -55,5 +60,35 @@ public class ToolController {
     public AppResponse deleteTool(@PathVariable UUID toolId) {
 
         return toolService.deleteTool(toolId);
+    }
+
+    @PostMapping("{toolId}/columns")
+    public IdResponse createColumn(@PathVariable UUID toolId, @RequestBody ColumnRequest request) {
+
+        return toolService.createColumn(toolId, request);
+    }
+
+    @GetMapping("{toolId}/columns")
+    public List<ColumnResponse> getAllToolColumns(@PathVariable UUID toolId) {
+
+        return toolService.getAllToolColumns(toolId);
+    }
+
+    @GetMapping("columns/{columnId}")
+    public Column getColumnById(@PathVariable UUID columnId) {
+
+        return columnService.getByColumnId(columnId);
+    }
+
+    @PutMapping("columns/{columnId}")
+    public AppResponse updateColumn(@PathVariable UUID columnId, @RequestBody ColumnRequest request) {
+
+        return columnService.updateColumn(columnId, request);
+    }
+
+    @DeleteMapping("columns/{columnId}")
+    public AppResponse deleteColumn(@PathVariable UUID columnId) {
+
+        return columnService.deleteColumn(columnId);
     }
 }

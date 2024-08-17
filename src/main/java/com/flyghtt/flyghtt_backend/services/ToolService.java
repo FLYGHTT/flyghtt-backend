@@ -1,9 +1,12 @@
 package com.flyghtt.flyghtt_backend.services;
 
 import com.flyghtt.flyghtt_backend.exceptions.ToolNotFoundException;
+import com.flyghtt.flyghtt_backend.models.entities.Column;
 import com.flyghtt.flyghtt_backend.models.entities.Tool;
+import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
 import com.flyghtt.flyghtt_backend.models.requests.ToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
+import com.flyghtt.flyghtt_backend.models.response.ColumnResponse;
 import com.flyghtt.flyghtt_backend.models.response.IdResponse;
 import com.flyghtt.flyghtt_backend.models.response.ToolResponse;
 import com.flyghtt.flyghtt_backend.repositories.ToolRepository;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 public class ToolService {
 
     private final ToolRepository toolRepository;
+    private final ColumnService columnService;
 
     public IdResponse createTool(ToolRequest request) {
 
@@ -57,7 +61,7 @@ public class ToolService {
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
         Tool tool = toolRepository.findByToolId(toolId).orElseThrow(ToolNotFoundException::new);
-        tool.setName(request.getToolName());
+        tool.setName(request.getToolName().toUpperCase());
         tool.setDescription(request.getToolDescription());
         tool.setLink(request.getLink());
         tool.setPublic(request.isPublic());
@@ -74,9 +78,32 @@ public class ToolService {
     public AppResponse deleteTool(UUID toolId) {
 
         toolRepository.deleteByToolId(toolId);
+        columnService.deleteAllToolColumns(toolId);
 
         return AppResponse.builder()
                 .status(HttpStatus.OK)
                 .message("Tool has been successfully deleted").build();
+    }
+
+    public IdResponse createColumn(UUID toolId, ColumnRequest request) {
+
+        Column column = Column.builder()
+                .name(request.getColumnName().toUpperCase())
+                .description(request.getDescription())
+                .toolId(toolId)
+                .build();
+
+        columnService.createColumn(column);
+
+        return IdResponse.builder()
+                .id(column.getColumnId())
+                .message("Column has been successfully created")
+                .build();
+    }
+
+    public List<ColumnResponse> getAllToolColumns(UUID toolId) {
+
+        return columnService.getAllByToolId(toolId).parallelStream().map(Column::toDto)
+                .collect(Collectors.toList());
     }
 }
