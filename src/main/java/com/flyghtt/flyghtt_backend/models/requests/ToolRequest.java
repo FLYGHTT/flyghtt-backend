@@ -1,10 +1,10 @@
 package com.flyghtt.flyghtt_backend.models.requests;
 
+import com.flyghtt.flyghtt_backend.models.entities.Tool;
+import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -18,6 +18,15 @@ public class ToolRequest {
     private boolean commentable;
     private boolean isPublic;
 
-    @NotNull
-    private List<ColumnRequest> columns;
+    public Tool toDb() {
+
+        return Tool.builder()
+                .name(toolName)
+                .description(toolDescription)
+                .link(link)
+                .commentable(commentable)
+                .isPublic(isPublic)
+                .createdBy(UserUtil.getLoggedInUser().get().getUserId())
+                .build();
+    }
 }

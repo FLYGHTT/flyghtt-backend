@@ -1,11 +1,13 @@
 package com.flyghtt.flyghtt_backend.models.entities;
 
 
+import com.flyghtt.flyghtt_backend.models.response.ToolResponse;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
@@ -14,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
+@Data
 @Table(name = "tools")
 public class Tool {
 
@@ -27,4 +30,15 @@ public class Tool {
 
     @Builder.Default private boolean commentable = true;
     @Builder.Default private boolean isPublic = true;
+
+    public ToolResponse toDto() {
+
+        return ToolResponse.builder()
+                .name(name)
+                .description(description)
+                .link(link)
+                .createdBy(createdBy)
+                .commentable(commentable)
+                .build();
+    }
 }
