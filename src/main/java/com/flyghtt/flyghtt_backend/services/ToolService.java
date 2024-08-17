@@ -1,39 +1,40 @@
 package com.flyghtt.flyghtt_backend.services;
 
-import com.flyghtt.flyghtt_backend.models.entities.Tool;
 import com.flyghtt.flyghtt_backend.models.requests.ToolRequest;
+import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.IdResponse;
-import com.flyghtt.flyghtt_backend.repositories.ToolRepository;
-import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 public class ToolService {
 
-    private final ToolRepository toolRepository;
-
     public IdResponse createTool(ToolRequest request) {
 
-        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
-
-        Tool tool = request.toDb();
-
-        toolRepository.save(tool);
-
-        return IdResponse.builder()
-                .id(tool.getToolId())
-                .message("Tool has been successfully created")
-                .build();
+        return null;
     }
 
     public ToolRequest getToolById(UUID toolId) {
 
-        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
+        return null;
+    }
 
-        return toolRepository.findByToolId(toolId).orElseThrow().toDto();
+    public List<ToolRequest> getAllToolsByUser() {
+
+        return null;
+    }
+
+    @Transactional
+    public AppResponse updateTool(ToolRequest request, UUID toolId) {
+
+        return null;
+    }
+
+    public void throwErrorIfToolNameNotAvailable() {
     }
 }
