@@ -4,6 +4,7 @@ import com.flyghtt.flyghtt_backend.exceptions.FactorNotFoundException;
 import com.flyghtt.flyghtt_backend.models.entities.Factor;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.repositories.FactorRepository;
+import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,10 +26,14 @@ public class FactorService {
 
     public List<Factor> getAllColumnFactors(UUID columnId) {
 
+        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
+
         return factorRepository.findAllByColumnId(columnId);
     }
 
     public AppResponse updateFactor(UUID factorId, OneFactorRequest request) {
+
+        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
         Factor factor = factorRepository.findByFactorId(factorId).orElseThrow(FactorNotFoundException::new);
         factor.setName(request.getFactor().toUpperCase());
@@ -41,6 +46,8 @@ public class FactorService {
 
     @Transactional
     public AppResponse deleteFactor(UUID factorId) {
+
+        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
         factorRepository.deleteByFactorId(factorId);
         return AppResponse.builder()

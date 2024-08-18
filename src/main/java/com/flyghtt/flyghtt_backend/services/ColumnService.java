@@ -95,6 +95,8 @@ public class ColumnService {
 
     public AppResponse createFactor(UUID columnId, FactorRequest request) {
 
+        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
+
         request.getFactors().forEach(
                 factor -> factorService.createFactor(
                         Factor.builder()
