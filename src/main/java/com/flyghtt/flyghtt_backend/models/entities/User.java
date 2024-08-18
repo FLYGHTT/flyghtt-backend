@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +38,7 @@ public class User {
 
     @Builder.Default private boolean emailVerified = false;
     @Builder.Default private boolean enabled = true;
+    @Builder.Default private Instant createdAt = Instant.now();
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -49,4 +51,15 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "follower_id", referencedColumnName = "userId")
     )
     private List<User> followers;
+
+    @Override
+    public boolean equals(Object user) {
+
+        if (getClass() != user.getClass())
+            return false;
+
+        User user2 = (User) user;
+
+        return userId.equals(user2.getUserId());
+    }
 }
