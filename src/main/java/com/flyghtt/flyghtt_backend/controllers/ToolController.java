@@ -2,13 +2,17 @@ package com.flyghtt.flyghtt_backend.controllers;
 
 
 import com.flyghtt.flyghtt_backend.models.entities.Column;
+import com.flyghtt.flyghtt_backend.models.entities.Factor;
 import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
+import com.flyghtt.flyghtt_backend.models.requests.FactorRequest;
 import com.flyghtt.flyghtt_backend.models.requests.ToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.ColumnResponse;
 import com.flyghtt.flyghtt_backend.models.response.IdResponse;
 import com.flyghtt.flyghtt_backend.models.response.ToolResponse;
 import com.flyghtt.flyghtt_backend.services.ColumnService;
+import com.flyghtt.flyghtt_backend.services.FactorService;
+import com.flyghtt.flyghtt_backend.services.OneFactorRequest;
 import com.flyghtt.flyghtt_backend.services.ToolService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +35,7 @@ public class ToolController {
 
     private final ToolService toolService;
     private final ColumnService columnService;
+    private final FactorService factorService;
 
     @PostMapping
     public IdResponse createTool(@RequestBody ToolRequest request) {
@@ -90,5 +95,29 @@ public class ToolController {
     public AppResponse deleteColumn(@PathVariable UUID columnId) {
 
         return columnService.deleteColumn(columnId);
+    }
+
+    @PostMapping("columns/{columnId}/factors")
+    public AppResponse createFactor(@PathVariable UUID columnId, @RequestBody FactorRequest request) {
+
+        return columnService.createFactor(columnId, request);
+    }
+
+    @GetMapping("columns/{columnId}/factors")
+    public List<Factor> getAllColumnFactors(@PathVariable UUID columnId) {
+
+        return factorService.getAllColumnFactors(columnId);
+    }
+
+    @PutMapping("columns/factors/{factorId}")
+    public AppResponse updateFactor(@PathVariable UUID factorId, @RequestBody OneFactorRequest request) {
+
+        return factorService.updateFactor(factorId, request);
+    }
+
+    @DeleteMapping("columns/factors/{factorId}")
+    public AppResponse deleteFactor(@PathVariable UUID factorId) {
+
+        return factorService.deleteFactor(factorId);
     }
 }

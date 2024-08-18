@@ -40,12 +40,3 @@ create table if not exists factors (
     constraint fk_column_factors_column_id foreign key (column_id)
                                           references columns(column_id)
 );
-
-create table if not exists factor_values (
-
-    factor_id uuid not null,
-    value varchar(255) default null,
-
-    constraint fk_factor_values_factor_id foreign key (factor_id)
-                                         references factors(factor_id)
-);

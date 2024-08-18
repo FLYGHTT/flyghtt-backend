@@ -3,8 +3,11 @@ package com.flyghtt.flyghtt_backend.services;
 import com.flyghtt.flyghtt_backend.exceptions.ColumnNotFoundException;
 import com.flyghtt.flyghtt_backend.exceptions.UnauthorizedException;
 import com.flyghtt.flyghtt_backend.models.entities.Column;
+import com.flyghtt.flyghtt_backend.models.entities.Factor;
 import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
+import com.flyghtt.flyghtt_backend.models.requests.FactorRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
+import com.flyghtt.flyghtt_backend.models.response.IdResponse;
 import com.flyghtt.flyghtt_backend.repositories.ColumnRepository;
 import com.flyghtt.flyghtt_backend.repositories.ToolRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
@@ -22,6 +25,7 @@ public class ColumnService {
 
     private final ColumnRepository columnRepository;
     private final ToolRepository toolRepository;
+    private final FactorService factorService;
 
     public void createColumn(Column column) {
 
@@ -63,6 +67,7 @@ public class ColumnService {
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
         canUserAlterTool();
 
+        factorService.deleteAllByColumnId(columnId);
         columnRepository.deleteByColumnId(columnId);
 
         return AppResponse.builder()
@@ -74,6 +79,9 @@ public class ColumnService {
     @Transactional
     void deleteAllToolColumns(UUID toolId) {
 
+        columnRepository.findAllByToolId(toolId).forEach(
+                column -> factorService.deleteAllByColumnId(column.getColumnId())
+        );
         columnRepository.deleteAllByToolId(toolId);
     }
 
@@ -83,5 +91,21 @@ public class ColumnService {
 
             throw new UnauthorizedException("You're not the creator of this tool");
         }
+    }
+
+    public AppResponse createFactor(UUID columnId, FactorRequest request) {
+
+        request.getFactors().forEach(
+                factor -> factorService.createFactor(
+                        Factor.builder()
+                        .columnId(columnId)
+                        .name(factor.toUpperCase())
+                                .build()
+                )
+        );
+
+        return AppResponse.builder()
+                .status(HttpStatus.CREATED)
+                .message("Factor has been successfully created").build();
     }
 }

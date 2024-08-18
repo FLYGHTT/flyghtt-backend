@@ -5,8 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ColumnFactorRequest {
+public class FactorRequest {
 
-    private String columnName;
     private List<String> factors;
 }
