@@ -14,6 +14,7 @@ import com.flyghtt.flyghtt_backend.repositories.ToolRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ public class ToolService {
     public IdResponse createTool(ToolRequest request) {
 
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
+        throwErrorIfToolNameNotAvailable(request.getToolName().toUpperCase());
 
         Tool tool = request.toDb();
         toolRepository.save(tool);
@@ -60,6 +62,7 @@ public class ToolService {
     public AppResponse updateTool(ToolRequest request, UUID toolId) {
 
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
+        throwErrorIfToolNameNotAvailable(request.getToolName().toUpperCase());
 
         canUserAlterTool();
 
@@ -125,6 +128,14 @@ public class ToolService {
         if (!toolRepository.existsByCreatedBy(UserUtil.getLoggedInUser().get().getUserId())) {
 
             throw new UnauthorizedException("You're not the creator of this tool");
+        }
+    }
+
+    public void throwErrorIfToolNameNotAvailable(String toBeName) {
+
+        if (toolRepository.existsByNameAndIsPublicTrue(toBeName)) {
+
+            throw new DataIntegrityViolationException("Tool name not available");
         }
     }
 }

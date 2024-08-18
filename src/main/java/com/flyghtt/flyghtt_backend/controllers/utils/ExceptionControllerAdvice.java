@@ -6,6 +6,7 @@ import com.flyghtt.flyghtt_backend.exceptions.EntityNotFoundException;
 import com.flyghtt.flyghtt_backend.exceptions.OtpException;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -29,6 +30,17 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler({OtpException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public AppResponse handleOtpException(OtpException exception) {
+
+        log.error("An error occurred while handling your request " + exception);
+        return AppResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .message(exception.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler({DataIntegrityViolationException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public AppResponse handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
 
         log.error("An error occurred while handling your request " + exception);
         return AppResponse.builder()
