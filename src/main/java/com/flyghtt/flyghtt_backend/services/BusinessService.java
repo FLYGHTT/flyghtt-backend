@@ -4,12 +4,16 @@ import com.flyghtt.flyghtt_backend.exceptions.BusinessNotFoundException;
 import com.flyghtt.flyghtt_backend.exceptions.UnauthorizedException;
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.entities.Business;
+import com.flyghtt.flyghtt_backend.models.entities.BusinessTool;
 import com.flyghtt.flyghtt_backend.models.entities.User;
 import com.flyghtt.flyghtt_backend.models.requests.AddEmployeeRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessRequest;
+import com.flyghtt.flyghtt_backend.models.requests.BusinessToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.BusinessResponse;
+import com.flyghtt.flyghtt_backend.models.response.IdResponse;
 import com.flyghtt.flyghtt_backend.repositories.BusinessRepository;
+import com.flyghtt.flyghtt_backend.repositories.BusinessToolRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,6 +32,7 @@ public class BusinessService {
 
     private final BusinessRepository businessRepository;
     private final UserService userService;
+    private final BusinessToolRepository businessToolRepository;
 
     public BusinessResponse createBusiness(BusinessRequest request) throws UserNotFoundException {
 
@@ -172,5 +178,23 @@ public class BusinessService {
         UUID userId = UserUtil.getLoggedInUser().get().getUserId();
 
         return businessRepository.findByBusinessIdAndCreatedBy(businessId, userId).orElseThrow(BusinessNotFoundException::new);
+    }
+
+    public AppResponse createBusinessTool(UUID businessId, List<BusinessToolRequest> requests) {
+
+        requests.forEach(
+                request -> {
+                    BusinessTool businessTool = BusinessTool.builder()
+                            .businessId(businessId)
+                            .factorId(request.getFactorId())
+                            .value(request.getValue())
+                            .build();
+
+                    businessToolRepository.save(businessTool);
+                });
+
+        return AppResponse.builder()
+                .status(HttpStatus.CREATED)
+                .message("Business tool has been successfully created").build();
     }
 }

@@ -3,8 +3,10 @@ package com.flyghtt.flyghtt_backend.controllers;
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.requests.AddEmployeeRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessRequest;
+import com.flyghtt.flyghtt_backend.models.requests.BusinessToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.BusinessResponse;
+import com.flyghtt.flyghtt_backend.models.response.IdResponse;
 import com.flyghtt.flyghtt_backend.services.BusinessService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -81,5 +83,11 @@ public class BusinessController {
     public AppResponse removeEmployees(@PathVariable UUID businessId, @RequestBody AddEmployeeRequest request) {
 
         return businessService.removeEmployees(businessId, request);
+    }
+
+    @PostMapping("{businessId}/tool")
+    public AppResponse createBusinessTool(@PathVariable UUID businessId, @RequestBody List<BusinessToolRequest> request) {
+
+        return businessService.createBusinessTool(businessId, request);
     }
 }

@@ -40,3 +40,19 @@ create table if not exists factors (
     constraint fk_column_factors_column_id foreign key (column_id)
                                           references columns(column_id)
 );
+
+create table if not exists business_tools (
+
+    business_tool_id uuid primary key,
+    value varchar(255) not null,
+
+    factor_id uuid not null,
+    business_id uuid not null,
+
+    unique (factor_id, business_id),
+
+    constraint fk_business_tools_factor_id foreign key (factor_id)
+                                          references factors(factor_id),
+    constraint fk_business_tools_business_id foreign key (business_id)
+                                          references businesses(business_id)
+);
