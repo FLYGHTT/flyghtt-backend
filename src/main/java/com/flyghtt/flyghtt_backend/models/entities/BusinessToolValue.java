@@ -1,5 +1,6 @@
 package com.flyghtt.flyghtt_backend.models.entities;
 
+import com.flyghtt.flyghtt_backend.models.response.BusinessToolValueResponse;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -23,4 +24,12 @@ public class BusinessToolValue {
     private UUID businessToolId;
     private UUID factorId;
     private String value;
+
+    public BusinessToolValueResponse toDto() {
+
+        return BusinessToolValueResponse.builder()
+                .factorId(factorId)
+                .value(value)
+                .build();
+    }
 }
