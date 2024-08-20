@@ -65,6 +65,8 @@ create table if not exists business_tool_values (
     business_tool_id uuid not null,
     factor_id uuid not null,
 
+    unique (factor_id, business_tool_id),
+
     constraint fk_business_tool_values_business_tool_id foreign key (business_tool_id)
                                                 references business_tools(business_tool_id),
     constraint fk_business_tool_values_factor_id foreign key (factor_id)

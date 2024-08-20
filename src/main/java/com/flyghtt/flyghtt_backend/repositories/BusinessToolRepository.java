@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface BusinessToolRepository extends JpaRepository<BusinessTool, Long> {
 
     Optional<BusinessTool> findByBusinessToolId(UUID businessToolId);
+    void deleteByBusinessToolId(UUID businessToolId);
 }

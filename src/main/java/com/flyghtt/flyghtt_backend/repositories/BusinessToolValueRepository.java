@@ -13,4 +13,5 @@ public interface BusinessToolValueRepository extends JpaRepository<BusinessToolV
 
     List<BusinessToolValue> findAllByBusinessToolId(UUID businessToolId);
     Optional<BusinessToolValue> findByFactorIdAndBusinessToolId(UUID factorId, UUID businessToolId);
+    void deleteAllByBusinessToolId(UUID businessToolId);
 }

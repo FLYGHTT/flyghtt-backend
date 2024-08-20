@@ -59,4 +59,15 @@ public class BusinessToolService {
                 .message("Business Tool has been successfully edited")
                 .build();
     }
+
+    @Transactional
+    public AppResponse deleteBusinessTool(UUID businessToolId) {
+
+        businessToolValueRepository.deleteAllByBusinessToolId(businessToolId);
+        businessToolRepository.deleteByBusinessToolId(businessToolId);
+
+        return AppResponse.builder()
+                .status(HttpStatus.OK)
+                .message("Business Tool has been successfully deleted").build();
+    }
 }
