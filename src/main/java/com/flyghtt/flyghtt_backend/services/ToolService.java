@@ -39,7 +39,7 @@ public class ToolService {
 
         return IdResponse.builder()
                 .id(tool.getToolId())
-                .message("Tool Has been successfully created")
+                .message("Tool Has been successfully created (Tool Id)")
                 .build();
     }
 
@@ -111,7 +111,7 @@ public class ToolService {
 
         return IdResponse.builder()
                 .id(column.getColumnId())
-                .message("Column has been successfully created")
+                .message("Column has been successfully created (Column Id)")
                 .build();
     }
 

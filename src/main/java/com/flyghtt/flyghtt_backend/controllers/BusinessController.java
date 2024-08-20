@@ -86,7 +86,7 @@ public class BusinessController {
     }
 
     @PostMapping("{businessId}/tool/{toolId}")
-    public AppResponse createBusinessTool(@PathVariable UUID businessId, @PathVariable UUID toolId, @RequestBody BusinessToolRequest request) {
+    public IdResponse createBusinessTool(@PathVariable UUID businessId, @PathVariable UUID toolId, @RequestBody BusinessToolRequest request) {
 
         return businessService.createBusinessTool(businessId, toolId, request);
     }

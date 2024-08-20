@@ -182,7 +182,7 @@ public class BusinessService {
     }
 
     @Transactional
-    public AppResponse createBusinessTool(UUID businessId, UUID toolId, BusinessToolRequest request) {
+    public IdResponse createBusinessTool(UUID businessId, UUID toolId, BusinessToolRequest request) {
 
         BusinessTool businessTool = BusinessTool.builder()
                         .businessId(businessId)
@@ -207,8 +207,8 @@ public class BusinessService {
 
         businessToolRepository.save(businessTool);
 
-        return AppResponse.builder()
-                .status(HttpStatus.CREATED)
-                .message("Business tool has been successfully created").build();
+        return IdResponse.builder()
+                .id(businessTool.getBusinessToolId())
+                .message("Business tool has been successfully created (Business Tool Id)").build();
     }
 }

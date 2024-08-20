@@ -10,6 +10,6 @@ import java.util.UUID;
 @Builder
 public class IdResponse {
 
-    private UUID id;
     private String message;
+    private UUID id;
 }
