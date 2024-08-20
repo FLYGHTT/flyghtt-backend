@@ -44,15 +44,29 @@ create table if not exists factors (
 create table if not exists business_tools (
 
     business_tool_id uuid primary key,
-    value varchar(255) not null,
 
-    factor_id uuid not null,
+    tool_id uuid not null,
     business_id uuid not null,
+    name varchar(50) not null,
+    created_at timestamp default now(),
 
-    unique (factor_id, business_id),
+    unique (tool_id, business_id),
 
-    constraint fk_business_tools_factor_id foreign key (factor_id)
-                                          references factors(factor_id),
+    constraint fk_business_tools_tool_id foreign key (tool_id)
+                                          references tools(tool_id),
     constraint fk_business_tools_business_id foreign key (business_id)
                                           references businesses(business_id)
+);
+
+create table if not exists business_tool_values (
+
+    business_tool_value_id uuid default gen_random_uuid(),
+    value varchar(255) default null,
+    business_tool_id uuid not null,
+    factor_id uuid not null,
+
+    constraint fk_business_tool_values_business_tool_id foreign key (business_tool_id)
+                                                references business_tools(business_tool_id),
+    constraint fk_business_tool_values_factor_id foreign key (factor_id)
+                                                references factors(factor_id)
 );

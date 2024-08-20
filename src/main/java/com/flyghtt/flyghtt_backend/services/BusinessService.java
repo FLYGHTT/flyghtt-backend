@@ -5,6 +5,7 @@ import com.flyghtt.flyghtt_backend.exceptions.UnauthorizedException;
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.entities.Business;
 import com.flyghtt.flyghtt_backend.models.entities.BusinessTool;
+import com.flyghtt.flyghtt_backend.models.entities.BusinessToolValue;
 import com.flyghtt.flyghtt_backend.models.entities.User;
 import com.flyghtt.flyghtt_backend.models.requests.AddEmployeeRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessRequest;
@@ -180,18 +181,31 @@ public class BusinessService {
         return businessRepository.findByBusinessIdAndCreatedBy(businessId, userId).orElseThrow(BusinessNotFoundException::new);
     }
 
-    public AppResponse createBusinessTool(UUID businessId, List<BusinessToolRequest> requests) {
+    @Transactional
+    public AppResponse createBusinessTool(UUID businessId, UUID toolId, BusinessToolRequest request) {
 
-        requests.forEach(
-                request -> {
-                    BusinessTool businessTool = BusinessTool.builder()
-                            .businessId(businessId)
-                            .factorId(request.getFactorId())
-                            .value(request.getValue())
-                            .build();
+        BusinessTool businessTool = BusinessTool.builder()
+                        .businessId(businessId)
+                                .toolId(toolId)
+                                        .name(request.getBusinessToolName().toUpperCase())
+                                                .build();
 
-                    businessToolRepository.save(businessTool);
-                });
+        businessToolRepository.save(businessTool);
+
+        List<BusinessToolValue> businessToolValues = new ArrayList<>();
+
+        request.getToolValues().forEach(
+                toolValue ->
+                    businessToolValues.add(BusinessToolValue.builder()
+                            .businessToolId(businessTool.getBusinessToolId())
+                            .factorId(toolValue.getFactorId())
+                            .value(toolValue.getValue())
+                            .build())
+                );
+
+        businessTool.setBusinessToolValues(businessToolValues);
+
+        businessToolRepository.save(businessTool);
 
         return AppResponse.builder()
                 .status(HttpStatus.CREATED)

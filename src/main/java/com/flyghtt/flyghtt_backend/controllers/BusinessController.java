@@ -85,9 +85,9 @@ public class BusinessController {
         return businessService.removeEmployees(businessId, request);
     }
 
-    @PostMapping("{businessId}/tool")
-    public AppResponse createBusinessTool(@PathVariable UUID businessId, @RequestBody List<BusinessToolRequest> request) {
+    @PostMapping("{businessId}/tool/{toolId}")
+    public AppResponse createBusinessTool(@PathVariable UUID businessId, @PathVariable UUID toolId, @RequestBody BusinessToolRequest request) {
 
-        return businessService.createBusinessTool(businessId, request);
+        return businessService.createBusinessTool(businessId, toolId, request);
     }
 }
