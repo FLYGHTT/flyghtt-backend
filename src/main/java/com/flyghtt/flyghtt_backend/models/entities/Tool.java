@@ -34,6 +34,7 @@ public class Tool {
     public ToolResponse toDto() {
 
         return ToolResponse.builder()
+                .toolId(toolId)
                 .name(name)
                 .description(description)
                 .link(link)
