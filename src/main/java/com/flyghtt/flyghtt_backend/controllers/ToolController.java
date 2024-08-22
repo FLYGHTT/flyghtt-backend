@@ -135,4 +135,10 @@ public class ToolController {
 
         return factorService.deleteFactor(factorId);
     }
+
+    @PostMapping("{toolId}/like")
+    public AppResponse likeTool(@PathVariable UUID toolId) {
+
+        return toolService.likeTool(toolId);
+    }
 }

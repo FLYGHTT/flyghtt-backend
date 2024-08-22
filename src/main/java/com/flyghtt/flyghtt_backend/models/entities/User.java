@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -55,15 +56,15 @@ public class User {
     )
     private List<User> followers;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "liked_tools",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "userId"),
             inverseJoinColumns = @JoinColumn(name = "tool_id", referencedColumnName = "toolId")
     )
-    private List<Tool> likedTools;
+    private Set<Tool> likedTools;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "favourite_tools",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "userId"),
@@ -92,7 +93,7 @@ public class User {
                 .build();
     }
 
-    public List<ToolResponse> getLikedTools() {
+    public List<ToolResponse> getLikedToolsResponse() {
 
         if (likedTools == null) {
 
@@ -101,7 +102,7 @@ public class User {
         return likedTools.parallelStream().map(Tool::toDto).collect(Collectors.toList());
     }
 
-    public List<ToolResponse> getFavouriteTools() {
+    public List<ToolResponse> getFavouriteToolsResponse() {
 
         if (favouriteTools == null) {
 

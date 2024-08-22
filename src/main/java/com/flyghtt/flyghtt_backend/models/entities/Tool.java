@@ -4,12 +4,14 @@ package com.flyghtt.flyghtt_backend.models.entities;
 import com.flyghtt.flyghtt_backend.models.response.ToolResponse;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -31,6 +33,9 @@ public class Tool {
     @Builder.Default private boolean commentable = true;
     @Builder.Default private boolean isPublic = true;
 
+    @ManyToMany(mappedBy = "likedTools")
+    private Set<User> likedUsers;
+
     public ToolResponse toDto() {
 
         return ToolResponse.builder()
@@ -41,5 +46,16 @@ public class Tool {
                 .createdBy(createdBy)
                 .commentable(commentable)
                 .build();
+    }
+
+    @Override
+    public boolean equals(Object tool) {
+
+        if (getClass() != tool.getClass())
+            return false;
+
+        Tool tool2 = (Tool) tool;
+
+        return toolId.equals(tool2.getToolId());
     }
 }

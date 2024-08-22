@@ -6,6 +6,7 @@ import com.flyghtt.flyghtt_backend.models.response.ToolResponse;
 import com.flyghtt.flyghtt_backend.models.response.UserResponse;
 import com.flyghtt.flyghtt_backend.repositories.UserRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +38,19 @@ public class UserService {
         return UserUtil.getLoggedInUser().get().toDto();
     }
 
+    @Transactional
     public List<ToolResponse> getUserLikedTools() {
 
-        return UserUtil.getLoggedInUser().get().getLikedTools();
+        return UserUtil.getLoggedInUser().get().getLikedToolsResponse();
     }
 
     public List<ToolResponse> getUserFavouriteTools() {
 
-        return UserUtil.getLoggedInUser().get().getFavouriteTools();
+        return UserUtil.getLoggedInUser().get().getFavouriteToolsResponse();
+    }
+
+    public void saveUser(User user) {
+
+        userRepository.save(user);
     }
 }
