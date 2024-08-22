@@ -70,7 +70,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "userId"),
             inverseJoinColumns = @JoinColumn(name = "tool_id", referencedColumnName = "toolId")
     )
-    private List<Tool> favouriteTools;
+    private Set<Tool> favouriteTools;
 
     @Override
     public boolean equals(Object user) {

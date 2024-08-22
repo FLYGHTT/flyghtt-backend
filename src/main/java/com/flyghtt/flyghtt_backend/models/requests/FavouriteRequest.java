@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class LikeRequest {
+public class FavouriteRequest {
 
     @NotNull
-    private boolean like;
+    private boolean favourite;
 }
