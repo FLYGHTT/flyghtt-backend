@@ -6,6 +6,7 @@ import com.flyghtt.flyghtt_backend.models.entities.Column;
 import com.flyghtt.flyghtt_backend.models.entities.Tool;
 import com.flyghtt.flyghtt_backend.models.entities.User;
 import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
+import com.flyghtt.flyghtt_backend.models.requests.LikeRequest;
 import com.flyghtt.flyghtt_backend.models.requests.ToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.ColumnResponse;
@@ -19,7 +20,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -143,34 +143,30 @@ public class ToolService {
         }
     }
 
-    public AppResponse likeTool(UUID toolId) {
+    public AppResponse likeTool(UUID toolId, LikeRequest request) {
 
         User user = UserUtil.getLoggedInUser().get();
         Tool tool = toolRepository.findByToolId(toolId).orElseThrow(ToolNotFoundException::new);
 
-        Set<Tool> currentlyLikedTools = user.getLikedTools();
+        Set<Tool> currentLikedTools = user.getLikedTools();
+        String message;
 
-        if (!(currentlyLikedTools == null)) {
+        if (request.isLike()) {
 
-            if (currentlyLikedTools.contains(tool)) {
+            currentLikedTools.add(tool);
+            message = "Tool has been successfully liked";
+        } else {
 
-                return AppResponse.builder()
-                        .message("Tool already liked")
-                        .status(HttpStatus.OK).build();
-            }
-
-            currentlyLikedTools.add(tool);
-            user.setLikedTools(currentlyLikedTools);
+            currentLikedTools.removeIf(tool1 -> tool1.equals(tool));
+            message = "Tool has been successfully unliked";
         }
 
-        Set<Tool> tobeAdded = new HashSet<>();
-        tobeAdded.add(tool);
-        user.setLikedTools(tobeAdded);
+        user.setLikedTools(currentLikedTools);
 
         userService.saveUser(user);
 
         return AppResponse.builder()
-                .message("Tool has been liked successfully")
-                .status(HttpStatus.OK).build();
+                .status(HttpStatus.OK)
+                .message(message).build();
     }
 }
