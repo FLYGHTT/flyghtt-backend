@@ -31,6 +31,8 @@ public class UserUtil {
                 .userId(userDetails.getUserId())
                 .role(userDetails.getRole())
                 .followers(userDetails.getFollowers())
+                        .likedTools(userDetails.getLikedTools())
+                        .favouriteTools(userDetails.getFavouriteTools())
                 .build());
     }
 

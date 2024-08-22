@@ -1,6 +1,8 @@
 package com.flyghtt.flyghtt_backend.models.entities;
 
 
+import com.flyghtt.flyghtt_backend.models.response.ToolResponse;
+import com.flyghtt.flyghtt_backend.models.response.UserResponse;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -17,7 +19,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -52,6 +56,22 @@ public class User {
     )
     private List<User> followers;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "liked_tools",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "tool_id", referencedColumnName = "toolId")
+    )
+    private Set<Tool> likedTools;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "favourite_tools",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "userId"),
+            inverseJoinColumns = @JoinColumn(name = "tool_id", referencedColumnName = "toolId")
+    )
+    private Set<Tool> favouriteTools;
+
     @Override
     public boolean equals(Object user) {
 
@@ -61,5 +81,33 @@ public class User {
         User user2 = (User) user;
 
         return userId.equals(user2.getUserId());
+    }
+
+    public UserResponse toDto() {
+
+        return UserResponse.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .userId(userId)
+                .build();
+    }
+
+    public List<ToolResponse> getLikedToolsResponse() {
+
+        if (likedTools == null) {
+
+            return List.of();
+        }
+        return likedTools.parallelStream().map(Tool::toDto).collect(Collectors.toList());
+    }
+
+    public List<ToolResponse> getFavouriteToolsResponse() {
+
+        if (favouriteTools == null) {
+
+            return List.of();
+        }
+        return favouriteTools.parallelStream().map(Tool::toDto).collect(Collectors.toList());
     }
 }

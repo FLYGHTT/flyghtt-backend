@@ -62,6 +62,8 @@ public class UserDetailsImpl extends User implements UserDetails {
         userDetails.setRole(user.getRole());
         userDetails.setFollowers(user.getFollowers());
         userDetails.setEmailVerified(user.isEmailVerified());
+        userDetails.setLikedTools(user.getLikedTools());
+        userDetails.setFavouriteTools(user.getFavouriteTools());
 
         return userDetails;
     }

@@ -5,6 +5,8 @@ import com.flyghtt.flyghtt_backend.models.entities.Column;
 import com.flyghtt.flyghtt_backend.models.entities.Factor;
 import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
 import com.flyghtt.flyghtt_backend.models.requests.FactorRequest;
+import com.flyghtt.flyghtt_backend.models.requests.FavouriteRequest;
+import com.flyghtt.flyghtt_backend.models.requests.LikeRequest;
 import com.flyghtt.flyghtt_backend.models.requests.ToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.ColumnResponse;
@@ -134,5 +136,17 @@ public class ToolController {
     public AppResponse deleteFactor(@PathVariable UUID factorId) {
 
         return factorService.deleteFactor(factorId);
+    }
+
+    @PostMapping("{toolId}/like")
+    public AppResponse likeTool(@PathVariable UUID toolId, @RequestBody LikeRequest request) {
+
+        return toolService.likeTool(toolId, request);
+    }
+
+    @PostMapping("{toolId}/favourites")
+    public AppResponse addToFavourites(@PathVariable UUID toolId, @RequestBody FavouriteRequest request) {
+
+        return toolService.addToFavourites(toolId, request);
     }
 }

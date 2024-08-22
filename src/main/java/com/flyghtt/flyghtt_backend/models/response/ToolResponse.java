@@ -9,6 +9,7 @@ import java.util.UUID;
 @Builder
 public class ToolResponse {
 
+    private UUID toolId;
     private String name;
     private String description;
     private String link;
