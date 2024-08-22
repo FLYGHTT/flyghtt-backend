@@ -46,6 +46,8 @@ public class BusinessService {
                 .description(request.getDescription())
                 .createdBy(user.getUserId())
                 .createdAt(Instant.now())
+                .employees(new ArrayList<>())
+                .businessTools(new ArrayList<>())
                 .build();
 
         return businessRepository.save(business).toDto();
