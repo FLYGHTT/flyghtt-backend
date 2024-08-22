@@ -34,6 +34,7 @@ public class BusinessService {
     private final BusinessRepository businessRepository;
     private final UserService userService;
     private final BusinessToolRepository businessToolRepository;
+    private final BusinessToolService businessToolService;
 
     public BusinessResponse createBusiness(BusinessRequest request) throws UserNotFoundException {
 
@@ -90,6 +91,7 @@ public class BusinessService {
 
         UUID userId = UserUtil.getLoggedInUser().get().getUserId();
 
+        businessToolService.deleteBusinessToolsByBusinessId(businessId);
         businessRepository.deleteByBusinessIdAndCreatedBy(businessId, userId);
 
         return AppResponse.builder()

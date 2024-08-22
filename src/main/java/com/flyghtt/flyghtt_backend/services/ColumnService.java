@@ -7,7 +7,6 @@ import com.flyghtt.flyghtt_backend.models.entities.Factor;
 import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
 import com.flyghtt.flyghtt_backend.models.requests.FactorRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
-import com.flyghtt.flyghtt_backend.models.response.IdResponse;
 import com.flyghtt.flyghtt_backend.repositories.ColumnRepository;
 import com.flyghtt.flyghtt_backend.repositories.ToolRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
@@ -108,6 +107,6 @@ public class ColumnService {
 
         return AppResponse.builder()
                 .status(HttpStatus.CREATED)
-                .message("Factor has been successfully created").build();
+                .message("Factors has been successfully added to column").build();
     }
 }

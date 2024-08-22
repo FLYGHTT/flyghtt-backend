@@ -70,4 +70,13 @@ public class BusinessToolService {
                 .status(HttpStatus.OK)
                 .message("Business Tool has been successfully deleted").build();
     }
+
+    @Transactional
+    public void deleteBusinessToolsByBusinessId(UUID businessId) {
+
+        businessToolRepository.findAllByBusinessId(businessId).forEach(
+                businessTool -> deleteBusinessTool(businessTool.getBusinessToolId())
+        );
+        businessToolRepository.deleteAllByBusinessId(businessId);
+    }
 }
