@@ -46,7 +46,7 @@ public class Business {
     )
     private List<User> employees;
 
-    @OneToMany(mappedBy = "businessId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "businessId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<BusinessTool> businessTools;
 
 

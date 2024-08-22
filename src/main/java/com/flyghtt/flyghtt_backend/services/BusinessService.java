@@ -67,7 +67,7 @@ public class BusinessService {
 
         UUID userId = UserUtil.getLoggedInUser().get().getUserId();
 
-        return businessRepository.findAllByCreatedBy(userId).parallelStream().map(Business::toDto)
+        return businessRepository.findAllByCreatedByOrderByCreatedAtDesc(userId).parallelStream().map(Business::toDto)
                 .collect(Collectors.toList());
     }
 
