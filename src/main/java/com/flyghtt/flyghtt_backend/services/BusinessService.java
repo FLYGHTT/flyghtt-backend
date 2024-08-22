@@ -215,4 +215,9 @@ public class BusinessService {
                 .id(businessTool.getBusinessToolId())
                 .message("Business tool has been successfully created (Business Tool Id)").build();
     }
+
+    public List<BusinessTool> getBusinessToolsByBusinessId(UUID businessId) {
+
+        return businessToolRepository.findAllByBusinessIdOrderByCreatedAtDesc(businessId);
+    }
 }

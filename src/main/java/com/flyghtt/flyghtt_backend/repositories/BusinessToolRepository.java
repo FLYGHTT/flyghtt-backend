@@ -13,6 +13,7 @@ public interface BusinessToolRepository extends JpaRepository<BusinessTool, Long
 
     Optional<BusinessTool> findByBusinessToolId(UUID businessToolId);
     List<BusinessTool> findAllByBusinessId(UUID businessId);
+    List<BusinessTool> findAllByBusinessIdOrderByCreatedAtDesc(UUID businessId);
     void deleteByBusinessToolId(UUID businessToolId);
     void deleteAllByBusinessId(UUID businessId);
 }
