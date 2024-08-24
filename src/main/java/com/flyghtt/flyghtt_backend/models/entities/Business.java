@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,6 +46,9 @@ public class Business {
     )
     private List<User> employees;
 
+    @OneToMany(mappedBy = "businessId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<BusinessTool> businessTools;
+
 
     public BusinessResponse toDto() {
 
@@ -52,6 +56,9 @@ public class Business {
                 .businessId(businessId)
                 .businessName(name)
                 .description(description)
+                .numberOfEmployees(employees.size())
+                .createdAt(createdAt)
+                .numberOfBusinessTools(businessTools.size())
                 .build();
     }
 }

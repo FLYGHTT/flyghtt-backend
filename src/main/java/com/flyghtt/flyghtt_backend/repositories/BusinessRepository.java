@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface BusinessRepository extends JpaRepository<Business, Long> {
 
     Optional<Business> findByBusinessId(UUID businessId);
-    List<Business> findAllByCreatedBy(UUID createdBy);
+    List<Business> findAllByCreatedByOrderByCreatedAtDesc(UUID createdBy);
 
     Optional<Business> findByBusinessIdAndCreatedBy(UUID businessId, UUID createdBy);
 

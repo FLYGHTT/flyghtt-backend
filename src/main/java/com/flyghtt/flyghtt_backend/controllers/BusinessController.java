@@ -1,6 +1,7 @@
 package com.flyghtt.flyghtt_backend.controllers;
 
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
+import com.flyghtt.flyghtt_backend.models.entities.BusinessTool;
 import com.flyghtt.flyghtt_backend.models.requests.AddEmployeeRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessToolRequest;
@@ -89,5 +90,11 @@ public class BusinessController {
     public IdResponse createBusinessTool(@PathVariable UUID businessId, @PathVariable UUID toolId, @RequestBody BusinessToolRequest request) {
 
         return businessService.createBusinessTool(businessId, toolId, request);
+    }
+
+    @GetMapping("{businessId}/tools")
+    public List<BusinessTool> getAllBusinessToolsByBusinessId(@PathVariable UUID businessId) {
+
+        return businessService.getBusinessToolsByBusinessId(businessId);
     }
 }

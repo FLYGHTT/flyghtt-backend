@@ -34,6 +34,7 @@ public class BusinessService {
     private final BusinessRepository businessRepository;
     private final UserService userService;
     private final BusinessToolRepository businessToolRepository;
+    private final BusinessToolService businessToolService;
 
     public BusinessResponse createBusiness(BusinessRequest request) throws UserNotFoundException {
 
@@ -46,6 +47,8 @@ public class BusinessService {
                 .description(request.getDescription())
                 .createdBy(user.getUserId())
                 .createdAt(Instant.now())
+                .employees(new ArrayList<>())
+                .businessTools(new ArrayList<>())
                 .build();
 
         return businessRepository.save(business).toDto();
@@ -64,7 +67,7 @@ public class BusinessService {
 
         UUID userId = UserUtil.getLoggedInUser().get().getUserId();
 
-        return businessRepository.findAllByCreatedBy(userId).parallelStream().map(Business::toDto)
+        return businessRepository.findAllByCreatedByOrderByCreatedAtDesc(userId).parallelStream().map(Business::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -88,6 +91,7 @@ public class BusinessService {
 
         UUID userId = UserUtil.getLoggedInUser().get().getUserId();
 
+        businessToolService.deleteBusinessToolsByBusinessId(businessId);
         businessRepository.deleteByBusinessIdAndCreatedBy(businessId, userId);
 
         return AppResponse.builder()
@@ -210,5 +214,10 @@ public class BusinessService {
         return IdResponse.builder()
                 .id(businessTool.getBusinessToolId())
                 .message("Business tool has been successfully created (Business Tool Id)").build();
+    }
+
+    public List<BusinessTool> getBusinessToolsByBusinessId(UUID businessId) {
+
+        return businessToolRepository.findAllByBusinessIdOrderByCreatedAtDesc(businessId);
     }
 }
