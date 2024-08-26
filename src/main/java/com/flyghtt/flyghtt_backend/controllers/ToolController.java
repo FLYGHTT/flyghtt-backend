@@ -7,6 +7,7 @@ import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
 import com.flyghtt.flyghtt_backend.models.requests.FactorRequest;
 import com.flyghtt.flyghtt_backend.models.requests.FavouriteRequest;
 import com.flyghtt.flyghtt_backend.models.requests.LikeRequest;
+import com.flyghtt.flyghtt_backend.models.requests.ToolAllRequest;
 import com.flyghtt.flyghtt_backend.models.requests.ToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.ColumnResponse;
@@ -45,6 +46,12 @@ public class ToolController {
     public IdResponse createTool(@RequestBody ToolRequest request) {
 
         return toolService.createTool(request);
+    }
+
+    @PostMapping("all")
+    public IdResponse createTool(@RequestBody ToolAllRequest request) {
+
+        return toolService.createToolAll(request);
     }
 
     @Operation(summary = "Get tool by Id")
