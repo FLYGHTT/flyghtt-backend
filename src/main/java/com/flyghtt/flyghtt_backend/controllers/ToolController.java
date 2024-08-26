@@ -48,6 +48,7 @@ public class ToolController {
         return toolService.createTool(request);
     }
 
+    @Operation(summary = "Create tools with columns all at once")
     @PostMapping("all")
     public IdResponse createTool(@RequestBody ToolAllRequest request) {
 
