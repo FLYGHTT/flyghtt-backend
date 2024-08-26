@@ -3,11 +3,13 @@ package com.flyghtt.flyghtt_backend.services;
 import com.flyghtt.flyghtt_backend.exceptions.ToolNotFoundException;
 import com.flyghtt.flyghtt_backend.exceptions.UnauthorizedException;
 import com.flyghtt.flyghtt_backend.models.entities.Column;
+import com.flyghtt.flyghtt_backend.models.entities.Factor;
 import com.flyghtt.flyghtt_backend.models.entities.Tool;
 import com.flyghtt.flyghtt_backend.models.entities.User;
 import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
 import com.flyghtt.flyghtt_backend.models.requests.FavouriteRequest;
 import com.flyghtt.flyghtt_backend.models.requests.LikeRequest;
+import com.flyghtt.flyghtt_backend.models.requests.ToolAllRequest;
 import com.flyghtt.flyghtt_backend.models.requests.ToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.ColumnResponse;
@@ -33,6 +35,7 @@ public class ToolService {
     private final ToolRepository toolRepository;
     private final ColumnService columnService;
     private final UserService userService;
+    private final FactorService factorService;
 
     public IdResponse createTool(ToolRequest request) {
 
@@ -196,5 +199,48 @@ public class ToolService {
         return AppResponse.builder()
                 .status(HttpStatus.OK)
                 .message(message).build();
+    }
+
+    public IdResponse createToolAll(ToolAllRequest request) {
+
+        Tool tool = Tool.builder()
+                        .name(request.getName())
+                                .createdBy(UserUtil.getLoggedInUser().get().getUserId())
+                                        .description(request.getDescription())
+                                                .commentable(request.isCommentable())
+                                                        .isPublic(request.isPublic())
+                                                                .link(request.getLink())
+                                                                        .build();
+
+        toolRepository.save(tool);
+
+        request.getColumns().parallelStream().forEach(
+
+                columnAllRequest -> {
+
+                    Column column = Column.builder()
+                                    .name(columnAllRequest.getName())
+                                            .description(columnAllRequest.getDescription())
+                                                    .toolId(tool.getToolId()).build();
+
+                    columnService.createColumn(column);
+
+                    columnAllRequest.getFactors().forEach(
+                            factorName -> {
+
+                                Factor factor = Factor.builder()
+                                        .columnId(column.getColumnId())
+                                                .name(factorName)
+                                                        .build();
+                                factorService.createFactor(factor);
+                            }
+                    );
+                }
+        );
+
+        return IdResponse.builder()
+                .id(tool.getToolId())
+                .message("Tool has been successfully created (Tool Id)")
+                .build();
     }
 }
