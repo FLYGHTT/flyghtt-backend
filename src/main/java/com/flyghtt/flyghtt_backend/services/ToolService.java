@@ -36,6 +36,7 @@ public class ToolService {
     private final ColumnService columnService;
     private final UserService userService;
     private final FactorService factorService;
+    private final ToolCommentService toolCommentService;
 
     public IdResponse createTool(ToolRequest request) {
 
@@ -95,6 +96,7 @@ public class ToolService {
 
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
+        toolCommentService.deleteByToolId(toolId);
         columnService.deleteAllToolColumns(toolId);
         toolRepository.deleteByToolId(toolId);
 
@@ -204,7 +206,7 @@ public class ToolService {
     public IdResponse createToolAll(ToolAllRequest request) {
 
         Tool tool = Tool.builder()
-                        .name(request.getName())
+                        .name(request.getName().toUpperCase())
                                 .createdBy(UserUtil.getLoggedInUser().get().getUserId())
                                         .description(request.getDescription())
                                                 .commentable(request.isCommentable())
@@ -219,7 +221,7 @@ public class ToolService {
                 columnAllRequest -> {
 
                     Column column = Column.builder()
-                                    .name(columnAllRequest.getName())
+                                    .name(columnAllRequest.getName().toUpperCase())
                                             .description(columnAllRequest.getDescription())
                                                     .toolId(tool.getToolId()).build();
 
@@ -230,7 +232,7 @@ public class ToolService {
 
                                 Factor factor = Factor.builder()
                                         .columnId(column.getColumnId())
-                                                .name(factorName)
+                                                .name(factorName.toUpperCase())
                                                         .build();
                                 factorService.createFactor(factor);
                             }

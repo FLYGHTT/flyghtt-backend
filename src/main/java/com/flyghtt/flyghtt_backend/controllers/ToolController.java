@@ -3,11 +3,13 @@ package com.flyghtt.flyghtt_backend.controllers;
 
 import com.flyghtt.flyghtt_backend.models.entities.Column;
 import com.flyghtt.flyghtt_backend.models.entities.Factor;
+import com.flyghtt.flyghtt_backend.models.entities.ToolComment;
 import com.flyghtt.flyghtt_backend.models.requests.ColumnRequest;
 import com.flyghtt.flyghtt_backend.models.requests.FactorRequest;
 import com.flyghtt.flyghtt_backend.models.requests.FavouriteRequest;
 import com.flyghtt.flyghtt_backend.models.requests.LikeRequest;
 import com.flyghtt.flyghtt_backend.models.requests.ToolAllRequest;
+import com.flyghtt.flyghtt_backend.models.requests.ToolCommentRequest;
 import com.flyghtt.flyghtt_backend.models.requests.ToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.ColumnResponse;
@@ -16,6 +18,7 @@ import com.flyghtt.flyghtt_backend.models.response.ToolResponse;
 import com.flyghtt.flyghtt_backend.services.ColumnService;
 import com.flyghtt.flyghtt_backend.services.FactorService;
 import com.flyghtt.flyghtt_backend.services.OneFactorRequest;
+import com.flyghtt.flyghtt_backend.services.ToolCommentService;
 import com.flyghtt.flyghtt_backend.services.ToolService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +43,7 @@ public class ToolController {
     private final ToolService toolService;
     private final ColumnService columnService;
     private final FactorService factorService;
+    private final ToolCommentService toolCommentService;
 
     @Operation(summary = "Create Tool")
     @PostMapping
@@ -146,15 +150,59 @@ public class ToolController {
         return factorService.deleteFactor(factorId);
     }
 
+    @Operation(summary = "Like tool")
     @PostMapping("{toolId}/like")
     public AppResponse likeTool(@PathVariable UUID toolId, @RequestBody LikeRequest request) {
 
         return toolService.likeTool(toolId, request);
     }
 
+    @Operation(summary = "add tool to favourites")
     @PostMapping("{toolId}/favourites")
     public AppResponse addToFavourites(@PathVariable UUID toolId, @RequestBody FavouriteRequest request) {
 
         return toolService.addToFavourites(toolId, request);
+    }
+
+    @Operation(summary = "comment on tool")
+    @PostMapping("{toolId}/comments")
+    public IdResponse createToolComment(@RequestBody ToolCommentRequest request, @PathVariable UUID toolId) {
+
+        return toolCommentService.createToolComment(request, toolId);
+    }
+
+    @Operation(summary = "update comment")
+    @PutMapping("comments/{toolCommendId}")
+    public AppResponse updateToolComment(@RequestBody ToolCommentRequest request, @PathVariable UUID toolCommendId) {
+
+        return toolCommentService.updateToolComment(request, toolCommendId);
+    }
+
+    @Operation(summary = "get all tool comments")
+    @GetMapping("{toolId}/comments")
+    public List<ToolComment> getAllToolCommentsByToolId(@PathVariable UUID toolId) {
+
+        return toolCommentService.getAllToolCommentsByToolId(toolId);
+    }
+
+    @Operation(summary = "get all comments by user")
+    @GetMapping("comments/user/{userId}")
+    public List<ToolComment> getAllToolCommentsByUser(@PathVariable UUID userId) {
+
+        return toolCommentService.getAllToolCommentsByUserId(userId);
+    }
+
+    @Operation(summary = "get comment by comment id")
+    @GetMapping("comments/{toolCommentId}")
+    public ToolComment getToolCommentById(@PathVariable UUID toolCommentId) {
+
+        return toolCommentService.getToolCommentById(toolCommentId);
+    }
+
+    @Operation(summary = "delete comment by id")
+    @DeleteMapping("comments/{toolCommentId}")
+    public AppResponse deleteToolComment(@PathVariable UUID toolCommentId) {
+
+        return toolCommentService.deleteToolComment(toolCommentId);
     }
 }

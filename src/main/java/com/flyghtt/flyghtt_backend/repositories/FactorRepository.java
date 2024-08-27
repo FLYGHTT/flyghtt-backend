@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface FactorRepository extends JpaRepository<Factor, Long> {
+public interface FactorRepository extends JpaRepository<Factor, UUID> {
 
     List<Factor> findAllByColumnId(UUID columnId);
     Optional<Factor> findByFactorId(UUID factorId);

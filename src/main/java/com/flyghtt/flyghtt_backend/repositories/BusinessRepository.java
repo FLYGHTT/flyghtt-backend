@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface BusinessRepository extends JpaRepository<Business, Long> {
+public interface BusinessRepository extends JpaRepository<Business, UUID> {
 
     Optional<Business> findByBusinessId(UUID businessId);
     List<Business> findAllByCreatedByOrderByCreatedAtDesc(UUID createdBy);
