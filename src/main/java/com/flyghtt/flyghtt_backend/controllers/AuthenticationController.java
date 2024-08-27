@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("authentication/")
@@ -70,5 +72,11 @@ public class AuthenticationController {
     public AppResponse changePassword(@RequestBody ChangePasswordRequest request) throws FlyghttException {
 
         return authenticationService.changePassword(request);
+    }
+
+    @GetMapping
+    public Map<String, String> something() {
+
+        return Map.of("message", "Idk man");
     }
 }
