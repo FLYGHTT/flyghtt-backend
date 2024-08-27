@@ -32,7 +32,7 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        request -> request.requestMatchers("/authentication/sign-up", "/authentication/login", "/authentication/send/otp/**", "/authentication/reset/password", "/swagger-ui/**", "/v3/api-docs/**", "**").permitAll()
+                        request -> request.requestMatchers("/authentication/sign-up", "/authentication/login", "/authentication/send/otp/**", "/authentication/reset/password", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(
@@ -51,6 +51,7 @@ public class SecurityConfiguration {
 
         configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE"));
+        configuration.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
