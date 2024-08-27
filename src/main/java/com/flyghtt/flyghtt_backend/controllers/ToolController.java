@@ -150,48 +150,56 @@ public class ToolController {
         return factorService.deleteFactor(factorId);
     }
 
+    @Operation(summary = "Like tool")
     @PostMapping("{toolId}/like")
     public AppResponse likeTool(@PathVariable UUID toolId, @RequestBody LikeRequest request) {
 
         return toolService.likeTool(toolId, request);
     }
 
+    @Operation(summary = "add tool to favourites")
     @PostMapping("{toolId}/favourites")
     public AppResponse addToFavourites(@PathVariable UUID toolId, @RequestBody FavouriteRequest request) {
 
         return toolService.addToFavourites(toolId, request);
     }
 
+    @Operation(summary = "comment on tool")
     @PostMapping("{toolId}/comments")
     public IdResponse createToolComment(@RequestBody ToolCommentRequest request, @PathVariable UUID toolId) {
 
         return toolCommentService.createToolComment(request, toolId);
     }
 
+    @Operation(summary = "update comment")
     @PutMapping("comments/{toolCommendId}")
     public AppResponse updateToolComment(@RequestBody ToolCommentRequest request, @PathVariable UUID toolCommendId) {
 
         return toolCommentService.updateToolComment(request, toolCommendId);
     }
 
+    @Operation(summary = "get all tool comments")
     @GetMapping("{toolId}/comments")
     public List<ToolComment> getAllToolCommentsByToolId(@PathVariable UUID toolId) {
 
         return toolCommentService.getAllToolCommentsByToolId(toolId);
     }
 
+    @Operation(summary = "get all comments by user")
     @GetMapping("comments/user/{userId}")
     public List<ToolComment> getAllToolCommentsByUser(@PathVariable UUID userId) {
 
         return toolCommentService.getAllToolCommentsByUserId(userId);
     }
 
+    @Operation(summary = "get comment by comment id")
     @GetMapping("comments/{toolCommentId}")
     public ToolComment getToolCommentById(@PathVariable UUID toolCommentId) {
 
         return toolCommentService.getToolCommentById(toolCommentId);
     }
 
+    @Operation(summary = "delete comment by id")
     @DeleteMapping("comments/{toolCommentId}")
     public AppResponse deleteToolComment(@PathVariable UUID toolCommentId) {
 

@@ -86,12 +86,14 @@ public class BusinessController {
         return businessService.removeEmployees(businessId, request);
     }
 
+    @Operation(summary = "Adding values to tool for a business")
     @PostMapping("{businessId}/tool/{toolId}")
     public IdResponse createBusinessTool(@PathVariable UUID businessId, @PathVariable UUID toolId, @RequestBody BusinessToolRequest request) {
 
         return businessService.createBusinessTool(businessId, toolId, request);
     }
 
+    @Operation(summary = "Getting all business tools with values in them by business id")
     @GetMapping("{businessId}/tools")
     public List<BusinessTool> getAllBusinessToolsByBusinessId(@PathVariable UUID businessId) {
 
