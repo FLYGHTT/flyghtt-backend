@@ -1,5 +1,6 @@
 package com.flyghtt.flyghtt_backend.services;
 
+import com.flyghtt.flyghtt_backend.exceptions.EmailAlreadyExistsException;
 import com.flyghtt.flyghtt_backend.exceptions.FlyghttException;
 import com.flyghtt.flyghtt_backend.exceptions.OtpException;
 import com.flyghtt.flyghtt_backend.exceptions.OtpNotFoundException;
@@ -48,6 +49,10 @@ public class AuthenticationService {
     @Transactional
     public AuthenticationResponse signUp(RegisterRequest request) {
 
+        if (userRepository.existsByEmail(request.getEmail().strip())) {
+
+            throw new EmailAlreadyExistsException();
+        }
         User user = User.builder()
                 .email(request.getEmail())
                 .firstName(request.getFirstName())

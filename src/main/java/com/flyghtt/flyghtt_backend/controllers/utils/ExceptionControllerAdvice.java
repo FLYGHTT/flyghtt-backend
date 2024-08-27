@@ -1,6 +1,7 @@
 package com.flyghtt.flyghtt_backend.controllers.utils;
 
 
+import com.flyghtt.flyghtt_backend.exceptions.EmailAlreadyExistsException;
 import com.flyghtt.flyghtt_backend.exceptions.EntityNotFoundException;
 
 import com.flyghtt.flyghtt_backend.exceptions.OtpException;
@@ -30,6 +31,17 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler({OtpException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public AppResponse handleOtpException(OtpException exception) {
+
+        log.error("An error occurred while handling your request " + exception);
+        return AppResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .message(exception.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler({EmailAlreadyExistsException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public AppResponse handleEmailAlreadyExistsException(EmailAlreadyExistsException exception) {
 
         log.error("An error occurred while handling your request " + exception);
         return AppResponse.builder()
