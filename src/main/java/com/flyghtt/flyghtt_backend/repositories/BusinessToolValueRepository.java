@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface BusinessToolValueRepository extends JpaRepository<BusinessToolValue, Long> {
+public interface BusinessToolValueRepository extends JpaRepository<BusinessToolValue, UUID> {
 
     List<BusinessToolValue> findAllByBusinessToolId(UUID businessToolId);
     Optional<BusinessToolValue> findByFactorIdAndBusinessToolId(UUID factorId, UUID businessToolId);

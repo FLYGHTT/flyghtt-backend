@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ToolRepository extends JpaRepository<Tool, Long> {
+public interface ToolRepository extends JpaRepository<Tool, UUID> {
 
     Optional<Tool> findByToolId(UUID toolId);
     boolean existsByCreatedBy(UUID createdBy);
