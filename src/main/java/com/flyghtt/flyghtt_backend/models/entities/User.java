@@ -90,6 +90,7 @@ public class User {
                 .lastName(lastName)
                 .email(email)
                 .userId(userId)
+                .emailVerified(emailVerified)
                 .build();
     }
 
