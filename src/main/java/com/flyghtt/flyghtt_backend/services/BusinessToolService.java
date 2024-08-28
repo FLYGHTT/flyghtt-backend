@@ -6,6 +6,7 @@ import com.flyghtt.flyghtt_backend.models.entities.BusinessTool;
 import com.flyghtt.flyghtt_backend.models.entities.BusinessToolValue;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
+import com.flyghtt.flyghtt_backend.models.response.BusinessToolValueDto;
 import com.flyghtt.flyghtt_backend.models.response.BusinessToolValueResponse;
 import com.flyghtt.flyghtt_backend.repositories.BusinessToolRepository;
 import com.flyghtt.flyghtt_backend.repositories.BusinessToolValueRepository;
@@ -27,6 +28,18 @@ public class BusinessToolService {
     private final BusinessToolRepository businessToolRepository;
 
     public List<BusinessToolValueResponse> getBusinessToolValueResponseByBusinessTool(UUID businessToolId) {
+
+        BusinessTool businessTool = businessToolRepository.findByBusinessToolId(businessToolId).orElseThrow(BusinessToolNotFoundException::new);
+
+        BusinessToolValueDto response = BusinessToolValueDto.builder()
+                .name(businessTool.getName()).build();
+
+//        businessTool.getBusinessToolValues().forEach(
+//                businessToolValue -> {
+//
+//                    response.setColumns();
+//                }
+//        );
 
         return businessToolValueRepository.findAllByBusinessToolId(businessToolId).parallelStream()
                 .map(BusinessToolValue::toDto).collect(Collectors.toList());
