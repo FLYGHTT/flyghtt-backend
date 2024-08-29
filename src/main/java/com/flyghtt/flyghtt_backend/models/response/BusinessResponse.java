@@ -16,4 +16,5 @@ public class BusinessResponse {
     private int numberOfEmployees;
     private Instant createdAt;
     private int numberOfBusinessTools;
+    private byte[] businessLogoImageData;
 }

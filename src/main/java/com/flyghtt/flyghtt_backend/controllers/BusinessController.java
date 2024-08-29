@@ -6,6 +6,7 @@ import com.flyghtt.flyghtt_backend.models.requests.AddEmployeeRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
+import com.flyghtt.flyghtt_backend.models.response.BusinessLogoResponse;
 import com.flyghtt.flyghtt_backend.models.response.BusinessResponse;
 import com.flyghtt.flyghtt_backend.models.response.IdResponse;
 import com.flyghtt.flyghtt_backend.services.BusinessService;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,9 +35,15 @@ public class BusinessController {
 
     @Operation(summary = "Create Business")
     @PostMapping
-    public BusinessResponse createBusiness(@RequestBody BusinessRequest request) throws UserNotFoundException {
+    public BusinessResponse createBusiness(@ModelAttribute BusinessRequest request) throws UserNotFoundException, IOException {
 
         return businessService.createBusiness(request);
+    }
+
+    @GetMapping("/{businessId}/logo")
+    public BusinessLogoResponse getBusinessLogo(@PathVariable UUID businessId) {
+
+        return businessService.getBusinessLogo(businessId);
     }
 
     @Operation(summary = "Get business by business Id")
@@ -53,7 +62,7 @@ public class BusinessController {
 
     @Operation(summary = "Update business details")
     @PutMapping("{businessId}")
-    public BusinessResponse updateBusinessDetails(@PathVariable UUID businessId, @RequestBody BusinessRequest request) {
+    public BusinessResponse updateBusinessDetails(@PathVariable UUID businessId, @ModelAttribute BusinessRequest request) throws IOException {
 
         return businessService.updateBusinessDetails(businessId, request);
     }
@@ -63,13 +72,6 @@ public class BusinessController {
     public AppResponse deleteBusiness(@PathVariable UUID businessId) {
 
         return businessService.deleteBusiness(businessId);
-    }
-
-    @Operation(summary = "Delete all user businesses")
-    @DeleteMapping
-    public AppResponse deleteAllUserBusinesses() {
-
-        return businessService.deleteAllUserBusinesses();
     }
 
     @Operation(summary = "Add business employee")

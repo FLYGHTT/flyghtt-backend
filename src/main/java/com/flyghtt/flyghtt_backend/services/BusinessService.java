@@ -11,6 +11,7 @@ import com.flyghtt.flyghtt_backend.models.requests.AddEmployeeRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessToolRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
+import com.flyghtt.flyghtt_backend.models.response.BusinessLogoResponse;
 import com.flyghtt.flyghtt_backend.models.response.BusinessResponse;
 import com.flyghtt.flyghtt_backend.models.response.IdResponse;
 import com.flyghtt.flyghtt_backend.repositories.BusinessRepository;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +37,10 @@ public class BusinessService {
     private final UserService userService;
     private final BusinessToolRepository businessToolRepository;
     private final BusinessToolService businessToolService;
+    private final BusinessLogoService businessLogoService;
 
-    public BusinessResponse createBusiness(BusinessRequest request) throws UserNotFoundException {
+    @Transactional
+    public BusinessResponse createBusiness(BusinessRequest request) throws UserNotFoundException, IOException {
 
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
@@ -51,7 +55,14 @@ public class BusinessService {
                 .businessTools(new ArrayList<>())
                 .build();
 
-        return businessRepository.save(business).toDto();
+        businessRepository.save(business);
+
+        if (request.getBusinessLogo().isEmpty()) {
+
+            return business.toDto(null);
+        }
+
+        return business.toDto(businessLogoService.uploadImage(request.getBusinessLogo(), business.getBusinessId()));
     }
 
     public BusinessResponse getByBusinessId(UUID businessId) {
@@ -67,11 +78,14 @@ public class BusinessService {
 
         UUID userId = UserUtil.getLoggedInUser().get().getUserId();
 
-        return businessRepository.findAllByCreatedByOrderByCreatedAtDesc(userId).parallelStream().map(Business::toDto)
+        return businessRepository.findAllByCreatedByOrderByCreatedAtDesc(userId).parallelStream().map(
+                    business -> business.toDto(businessLogoService.downloadImage(business.getBusinessId()))
+                )
                 .collect(Collectors.toList());
     }
 
-    public BusinessResponse updateBusinessDetails(UUID businessId, BusinessRequest request) {
+    @Transactional
+    public BusinessResponse updateBusinessDetails(UUID businessId, BusinessRequest request) throws IOException {
 
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
@@ -81,7 +95,13 @@ public class BusinessService {
         business.setName(request.getBusinessName().toUpperCase());
         business.setDescription(request.getDescription());
 
-        return businessRepository.save(business).toDto();
+        if (request.getBusinessLogo().isEmpty()) {
+
+            businessLogoService.deleteByBusinessId(businessId);
+            return business.toDto(null);
+        }
+
+        return businessRepository.save(business).toDto(businessLogoService.updateBusinessLogo(businessId, request.getBusinessLogo()));
     }
 
     @Transactional
@@ -91,27 +111,13 @@ public class BusinessService {
 
         UUID userId = UserUtil.getLoggedInUser().get().getUserId();
 
+        businessLogoService.deleteByBusinessId(businessId);
         businessToolService.deleteBusinessToolsByBusinessId(businessId);
         businessRepository.deleteByBusinessIdAndCreatedBy(businessId, userId);
 
         return AppResponse.builder()
                 .status(HttpStatus.OK)
                 .message("Business has been successfully deleted")
-                .build();
-    }
-
-    @Transactional
-    public AppResponse deleteAllUserBusinesses() {
-
-        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
-
-        UUID userId = UserUtil.getLoggedInUser().get().getUserId();
-
-        businessRepository.deleteAllByCreatedBy(userId);
-
-        return AppResponse.builder()
-                .status(HttpStatus.OK)
-                .message("All user businesses has been successfully deleted")
                 .build();
     }
 
@@ -128,7 +134,7 @@ public class BusinessService {
             throw new UnauthorizedException("not an employee or owner of this business.");
         }
 
-        return business.toDto();
+        return business.toDto(businessLogoService.downloadImage(businessId));
     }
 
     public AppResponse addEmployees(UUID businessId, AddEmployeeRequest request) {
@@ -219,5 +225,12 @@ public class BusinessService {
     public List<BusinessTool> getBusinessToolsByBusinessId(UUID businessId) {
 
         return businessToolRepository.findAllByBusinessIdOrderByCreatedAtDesc(businessId);
+    }
+
+    public BusinessLogoResponse getBusinessLogo(UUID businessId) {
+
+        byte[] imageData = businessLogoService.downloadImage(businessId);
+        return BusinessLogoResponse.builder()
+                .imageData(imageData).build();
     }
 }
