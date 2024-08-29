@@ -9,4 +9,9 @@ public class BusinessRequest {
     private String businessName;
     private String description;
     private MultipartFile businessLogo;
+
+    public void clean() {
+
+        this.businessName = businessName.trim().toUpperCase();
+    }
 }
