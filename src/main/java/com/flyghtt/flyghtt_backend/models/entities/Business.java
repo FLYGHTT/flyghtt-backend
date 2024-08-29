@@ -50,7 +50,7 @@ public class Business {
     private List<BusinessTool> businessTools;
 
 
-    public BusinessResponse toDto() {
+    public BusinessResponse toDto(byte[] businessLogoImageData) {
 
         return BusinessResponse.builder()
                 .businessId(businessId)
@@ -59,6 +59,7 @@ public class Business {
                 .numberOfEmployees(employees.size())
                 .createdAt(createdAt)
                 .numberOfBusinessTools(businessTools.size())
+                .businessLogoImageData(businessLogoImageData)
                 .build();
     }
 }
