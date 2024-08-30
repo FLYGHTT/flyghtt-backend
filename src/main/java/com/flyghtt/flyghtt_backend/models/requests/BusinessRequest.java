@@ -13,5 +13,10 @@ public class BusinessRequest {
     public void clean() {
 
         this.businessName = businessName.trim().toUpperCase();
+
+        if (businessLogo.isEmpty()) {
+
+            this.businessLogo = null;
+        }
     }
 }

@@ -19,6 +19,7 @@ import com.flyghtt.flyghtt_backend.repositories.BusinessToolRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,8 @@ public class BusinessService {
     @Transactional
     public BusinessResponse createBusiness(BusinessRequest request) throws UserNotFoundException, IOException {
 
+        request.clean();
+
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
         User user = UserUtil.getLoggedInUser().get();
@@ -55,9 +58,9 @@ public class BusinessService {
                 .businessTools(new ArrayList<>())
                 .build();
 
-        businessRepository.save(business);
+        saveBusiness(business);
 
-        if (request.getBusinessLogo().isEmpty()) {
+        if (request.getBusinessLogo() == null) {
 
             return business.toDto(null);
         }
@@ -87,6 +90,8 @@ public class BusinessService {
     @Transactional
     public BusinessResponse updateBusinessDetails(UUID businessId, BusinessRequest request) throws IOException {
 
+        request.clean();
+
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
         UUID userId = UserUtil.getLoggedInUser().get().getUserId();
@@ -95,13 +100,13 @@ public class BusinessService {
         business.setName(request.getBusinessName().toUpperCase());
         business.setDescription(request.getDescription());
 
-        if (request.getBusinessLogo().isEmpty()) {
+        if (request.getBusinessLogo() == null) {
 
             businessLogoService.deleteByBusinessId(businessId);
             return business.toDto(null);
         }
 
-        return businessRepository.save(business).toDto(businessLogoService.updateBusinessLogo(businessId, request.getBusinessLogo()));
+        return saveBusiness(business).toDto(businessLogoService.updateBusinessLogo(businessId, request.getBusinessLogo()));
     }
 
     @Transactional
@@ -232,5 +237,19 @@ public class BusinessService {
         byte[] imageData = businessLogoService.downloadImage(businessId);
         return BusinessLogoResponse.builder()
                 .imageData(imageData).build();
+    }
+
+    public Business saveBusiness(Business business) {
+
+        try {
+            Business toBeSaved = businessRepository.save(business);
+            businessRepository.flush();
+
+            return toBeSaved;
+
+        } catch (DataIntegrityViolationException ex) {
+
+            throw new com.flyghtt.flyghtt_backend.exceptions.DataIntegrityViolationException("BUSINESS NAME");
+        }
     }
 }
