@@ -7,6 +7,7 @@ import com.flyghtt.flyghtt_backend.repositories.FactorRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +20,15 @@ public class FactorService {
 
     private final FactorRepository factorRepository;
 
-    public void createFactor(Factor factor) {
+    public void saveFactor(Factor factor) {
 
-        factorRepository.save(factor);
+        try {
+            factorRepository.save(factor);
+            factorRepository.flush();
+        } catch (DataIntegrityViolationException ex) {
+
+            throw new com.flyghtt.flyghtt_backend.exceptions.DataIntegrityViolationException("FACTOR NAME " + factor.getName());
+        }
     }
 
     public List<Factor> getAllColumnFactors(UUID columnId) {
@@ -37,7 +44,8 @@ public class FactorService {
 
         Factor factor = factorRepository.findByFactorId(factorId).orElseThrow(FactorNotFoundException::new);
         factor.setName(request.getFactor().toUpperCase());
-        factorRepository.save(factor);
+
+        saveFactor(factor);
 
         return AppResponse.builder()
                 .status(HttpStatus.OK)

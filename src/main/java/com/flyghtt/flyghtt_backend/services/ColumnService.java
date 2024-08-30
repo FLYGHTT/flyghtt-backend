@@ -12,6 +12,7 @@ import com.flyghtt.flyghtt_backend.repositories.ToolRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +27,15 @@ public class ColumnService {
     private final ToolRepository toolRepository;
     private final FactorService factorService;
 
-    public void createColumn(Column column) {
+    public void saveColumn(Column column) {
 
-        columnRepository.save(column);
+        try {
+            columnRepository.save(column);
+            columnRepository.flush();
+        } catch (DataIntegrityViolationException ex) {
+
+            throw new com.flyghtt.flyghtt_backend.exceptions.DataIntegrityViolationException("COLUMN NAME " + column.getName());
+        }
     }
 
     public List<Column> getAllByToolId(UUID toolId) {
@@ -52,7 +59,7 @@ public class ColumnService {
         column.setName(request.getColumnName().toUpperCase());
         column.setDescription(request.getDescription());
 
-        columnRepository.save(column);
+        saveColumn(column);
 
         return AppResponse.builder()
                 .status(HttpStatus.OK)
@@ -97,7 +104,7 @@ public class ColumnService {
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
 
         request.getFactors().forEach(
-                factor -> factorService.createFactor(
+                factor -> factorService.saveFactor(
                         Factor.builder()
                         .columnId(columnId)
                         .name(factor.toUpperCase())

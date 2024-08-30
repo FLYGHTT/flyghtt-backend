@@ -117,7 +117,7 @@ public class ToolService {
                 .toolId(toolId)
                 .build();
 
-        columnService.createColumn(column);
+        columnService.saveColumn(column);
 
         return IdResponse.builder()
                 .id(column.getColumnId())
@@ -225,7 +225,7 @@ public class ToolService {
                                             .description(columnAllRequest.getDescription())
                                                     .toolId(tool.getToolId()).build();
 
-                    columnService.createColumn(column);
+                    columnService.saveColumn(column);
 
                     columnAllRequest.getFactors().forEach(
                             factorName -> {
@@ -234,7 +234,7 @@ public class ToolService {
                                         .columnId(column.getColumnId())
                                                 .name(factorName.toUpperCase())
                                                         .build();
-                                factorService.createFactor(factor);
+                                factorService.saveFactor(factor);
                             }
                     );
                 }
