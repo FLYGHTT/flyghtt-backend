@@ -249,7 +249,7 @@ public class BusinessService {
 
         } catch (DataIntegrityViolationException ex) {
 
-            throw new com.flyghtt.flyghtt_backend.exceptions.DataIntegrityViolationException("BUSINESS NAME");
+            throw new com.flyghtt.flyghtt_backend.exceptions.DataIntegrityViolationException("BUSINESS NAME " + business.getName());
         }
     }
 }
