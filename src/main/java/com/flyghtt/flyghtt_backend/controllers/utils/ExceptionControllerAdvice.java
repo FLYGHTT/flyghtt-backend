@@ -61,6 +61,17 @@ public class ExceptionControllerAdvice {
                 .build();
     }
 
+    @ExceptionHandler({EntityNotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public AppResponse handleEntityNotFoundException(EntityNotFoundException exception) {
+
+        log.error("An error occurred while handling your request " + exception);
+        return AppResponse.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .message(exception.getMessage())
+                .build();
+    }
+
     @ExceptionHandler({Exception.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public AppResponse handleGenericException(Exception exception) {

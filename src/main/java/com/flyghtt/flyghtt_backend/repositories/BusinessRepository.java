@@ -15,8 +15,7 @@ public interface BusinessRepository extends JpaRepository<Business, UUID> {
     List<Business> findAllByCreatedByOrderByCreatedAtDesc(UUID createdBy);
 
     Optional<Business> findByBusinessIdAndCreatedBy(UUID businessId, UUID createdBy);
+    boolean existsByBusinessIdAndCreatedBy(UUID businessId, UUID createdBy);
 
     void deleteByBusinessIdAndCreatedBy(UUID businessId, UUID createdBy);
-
-    void deleteAllByCreatedBy(UUID createdBy);
 }

@@ -1,19 +1,26 @@
 package com.flyghtt.flyghtt_backend.services;
 
+import com.flyghtt.flyghtt_backend.exceptions.BusinessCollaboratorRequestNotFoundException;
 import com.flyghtt.flyghtt_backend.exceptions.BusinessNotFoundException;
 import com.flyghtt.flyghtt_backend.exceptions.UnauthorizedException;
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
+import com.flyghtt.flyghtt_backend.models.entities.ApprovalStatus;
 import com.flyghtt.flyghtt_backend.models.entities.Business;
+import com.flyghtt.flyghtt_backend.models.entities.BusinessCollaborator;
+import com.flyghtt.flyghtt_backend.models.entities.BusinessCollaboratorRequest;
 import com.flyghtt.flyghtt_backend.models.entities.BusinessTool;
 import com.flyghtt.flyghtt_backend.models.entities.BusinessToolValue;
 import com.flyghtt.flyghtt_backend.models.entities.User;
-import com.flyghtt.flyghtt_backend.models.requests.AddEmployeeRequest;
+import com.flyghtt.flyghtt_backend.models.requests.AddCollaboratorRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessToolRequest;
+import com.flyghtt.flyghtt_backend.models.requests.CollaboratorIdRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.BusinessLogoResponse;
 import com.flyghtt.flyghtt_backend.models.response.BusinessResponse;
 import com.flyghtt.flyghtt_backend.models.response.IdResponse;
+import com.flyghtt.flyghtt_backend.repositories.BusinessCollaboratorRepository;
+import com.flyghtt.flyghtt_backend.repositories.BusinessCollaboratorRequestRepository;
 import com.flyghtt.flyghtt_backend.repositories.BusinessRepository;
 import com.flyghtt.flyghtt_backend.repositories.BusinessToolRepository;
 import com.flyghtt.flyghtt_backend.services.utils.UserUtil;
@@ -26,7 +33,9 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -35,10 +44,11 @@ import java.util.stream.Collectors;
 public class BusinessService {
 
     private final BusinessRepository businessRepository;
-    private final UserService userService;
+    private final BusinessCollaboratorRepository businessCollaboratorRepository;
     private final BusinessToolRepository businessToolRepository;
     private final BusinessToolService businessToolService;
     private final BusinessLogoService businessLogoService;
+    private final BusinessCollaboratorRequestRepository businessCollaboratorRequestRepository;
 
     @Transactional
     public BusinessResponse createBusiness(BusinessRequest request) throws UserNotFoundException, IOException {
@@ -54,7 +64,7 @@ public class BusinessService {
                 .description(request.getDescription())
                 .createdBy(user.getUserId())
                 .createdAt(Instant.now())
-                .employees(new ArrayList<>())
+                .collaborators(new HashSet<>())
                 .businessTools(new ArrayList<>())
                 .build();
 
@@ -116,6 +126,7 @@ public class BusinessService {
 
         UUID userId = UserUtil.getLoggedInUser().get().getUserId();
 
+        deleteBusinessCollaborators(businessId);
         businessLogoService.deleteByBusinessId(businessId);
         businessToolService.deleteBusinessToolsByBusinessId(businessId);
         businessRepository.deleteByBusinessIdAndCreatedBy(businessId, userId);
@@ -126,6 +137,12 @@ public class BusinessService {
                 .build();
     }
 
+    private void deleteBusinessCollaborators(UUID businessId) {
+
+        businessCollaboratorRepository.deleteAllByBusinessId(businessId);
+        businessCollaboratorRequestRepository.deleteAllByBusinessId(businessId);
+    }
+
     private BusinessResponse getBusinessById(UUID businessId) {
 
         UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
@@ -134,59 +151,12 @@ public class BusinessService {
 
         Business business = businessRepository.findByBusinessId(businessId).orElseThrow(BusinessNotFoundException::new);
 
-        if (!(business.getCreatedBy().equals(user.getUserId()) || business.getEmployees().parallelStream().map(User::getUserId).toList().contains(user.getUserId()))) {
+        if (!(business.getCreatedBy().equals(user.getUserId()) || business.getCollaborators().parallelStream().map(BusinessCollaborator::getUserId).toList().contains(user.getUserId()))) {
 
             throw new UnauthorizedException("not an employee or owner of this business.");
         }
 
         return business.toDto(businessLogoService.downloadImage(businessId));
-    }
-
-    public AppResponse addEmployees(UUID businessId, AddEmployeeRequest request) {
-
-        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
-
-        Business business = getBusinessByBusinessIdAndCreatedBy(businessId);
-
-        List<User> employees = business.getEmployees();
-        List<User> toBeAdded = userService.getUsersByListOfIds(request.getEmployeeIds().stream().toList());
-
-        for (User user: toBeAdded) {
-
-            if (employees.contains(user)){
-
-                toBeAdded.remove(user);
-            }
-        }
-
-        employees.addAll(toBeAdded);
-
-        business.setEmployees(employees);
-
-        businessRepository.save(business);
-
-        return AppResponse.builder()
-                .status(HttpStatus.OK)
-                .message("Employees have been successfully added").build();
-    }
-
-    public AppResponse removeEmployees(UUID businessId, AddEmployeeRequest request) {
-
-        UserUtil.throwErrorIfNotUserEmailVerifiedAndEnabled();
-
-        Business business = getBusinessByBusinessIdAndCreatedBy(businessId);
-
-        List<User> employees = business.getEmployees();
-        List<User> toBeRemoved = userService.getUsersByListOfIds(request.getEmployeeIds().stream().toList());
-
-        employees.removeAll(toBeRemoved);
-        business.setEmployees(employees);
-
-        businessRepository.save(business);
-
-        return AppResponse.builder()
-                .status(HttpStatus.OK)
-                .message("Employees have been successfully removed").build();
     }
 
     public Business getBusinessByBusinessIdAndCreatedBy(UUID businessId) {
@@ -250,6 +220,85 @@ public class BusinessService {
         } catch (DataIntegrityViolationException ex) {
 
             throw new com.flyghtt.flyghtt_backend.exceptions.DataIntegrityViolationException("BUSINESS NAME " + business.getName());
+        }
+    }
+
+    public AppResponse requestCollaborator(UUID businessId, Set<AddCollaboratorRequest> requests) {
+
+        throwErrorIfNotBusinessOwner(businessId);
+        requests.forEach(
+                request -> {
+
+                    BusinessCollaboratorRequest collaboratorRequest = BusinessCollaboratorRequest.builder()
+                            .businessId(businessId)
+                            .collaboratorId(request.getCollaboratorId())
+                            .role(request.getRole())
+                            .approvalStatus(ApprovalStatus.PENDING).build();
+
+                    businessCollaboratorRequestRepository.save(collaboratorRequest);
+                }
+        );
+
+        return AppResponse.builder()
+                .status(HttpStatus.OK)
+                .message("Requests have been sent successfully").build();
+    }
+
+    @Transactional
+    public AppResponse removeCollaborator(UUID businessId, CollaboratorIdRequest request) {
+
+        throwErrorIfNotBusinessOwner(businessId);
+        request.getCollaboratorIds().forEach(
+                collaboratorId -> businessCollaboratorRepository.deleteByBusinessIdAndUserId(businessId, collaboratorId));
+
+        return AppResponse.builder()
+                .status(HttpStatus.OK)
+                .message("Employees have been successfully removed").build();
+    }
+
+    @Transactional
+    public AppResponse joinBusiness(UUID businessId, ApprovalStatus status) {
+
+        User loggedInUser = UserUtil.getLoggedInUser().get();
+        BusinessCollaboratorRequest businessCollaboratorRequest = businessCollaboratorRequestRepository.findByCollaboratorIdAndBusinessId(loggedInUser.getUserId(), businessId).orElseThrow(BusinessCollaboratorRequestNotFoundException::new);
+
+        BusinessCollaborator businessCollaborator = BusinessCollaborator.builder()
+                .role(businessCollaboratorRequest.getRole())
+                .businessId(businessId)
+                .userId(loggedInUser.getUserId()).build();
+
+        businessCollaboratorRequestRepository.deleteById(businessCollaboratorRequest.getBusinessCollaboratorRequestId());
+
+
+        String message = "You're successfully rejected invite to join " + businessRepository.findByBusinessId(businessId).get().getName();
+
+        if (status.equals(ApprovalStatus.APPROVED)) {
+
+            message = "You're successfully joined this " + businessRepository.findByBusinessId(businessId).get().getName();
+            businessCollaboratorRepository.save(businessCollaborator);
+        }
+
+        return AppResponse.builder()
+                .status(HttpStatus.OK)
+                .message(message)
+                .build();
+    }
+
+    @Transactional
+    public AppResponse leaveBusiness(UUID businessId) {
+
+        businessCollaboratorRepository.deleteByBusinessIdAndUserId(businessId, UserUtil.getLoggedInUser().get().getUserId());
+
+        return AppResponse.builder()
+                .status(HttpStatus.OK)
+                .message("Successfully left business").build();
+    }
+
+    public void throwErrorIfNotBusinessOwner(UUID businessId) {
+
+        if (!businessRepository.existsByBusinessIdAndCreatedBy(businessId, UserUtil.getLoggedInUser().get().getUserId())) {
+
+            throw new UnauthorizedException("you're not the business owner");
         }
     }
 }
