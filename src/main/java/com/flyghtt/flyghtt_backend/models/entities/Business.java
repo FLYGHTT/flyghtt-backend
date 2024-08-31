@@ -5,9 +5,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -17,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -38,13 +36,8 @@ public class Business {
     private Instant createdAt = Instant.now();
     private UUID createdBy;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "business_employees",
-            joinColumns = @JoinColumn(name = "business_id", referencedColumnName = "businessId"),
-            inverseJoinColumns = @JoinColumn(name = "employee_id", referencedColumnName = "userId")
-    )
-    private List<User> employees;
+    @OneToMany(mappedBy = "businessCollaboratorId", fetch = FetchType.EAGER)
+    private Set<BusinessCollaborator> collaborators;
 
     @OneToMany(mappedBy = "businessId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<BusinessTool> businessTools;
@@ -56,7 +49,7 @@ public class Business {
                 .businessId(businessId)
                 .businessName(name)
                 .description(description)
-                .numberOfEmployees(employees.size())
+                .numberOfEmployees(collaborators.size())
                 .createdAt(createdAt)
                 .numberOfBusinessTools(businessTools.size())
                 .businessLogoImageData(businessLogoImageData)

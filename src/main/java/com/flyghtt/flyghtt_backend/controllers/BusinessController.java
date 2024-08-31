@@ -2,13 +2,15 @@ package com.flyghtt.flyghtt_backend.controllers;
 
 import com.flyghtt.flyghtt_backend.exceptions.UserNotFoundException;
 import com.flyghtt.flyghtt_backend.models.entities.BusinessTool;
-import com.flyghtt.flyghtt_backend.models.requests.AddEmployeeRequest;
+import com.flyghtt.flyghtt_backend.models.requests.AddCollaboratorRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessToolRequest;
+import com.flyghtt.flyghtt_backend.models.requests.CollaboratorIdRequest;
 import com.flyghtt.flyghtt_backend.models.response.AppResponse;
 import com.flyghtt.flyghtt_backend.models.response.BusinessLogoResponse;
 import com.flyghtt.flyghtt_backend.models.response.BusinessResponse;
 import com.flyghtt.flyghtt_backend.models.response.IdResponse;
+import com.flyghtt.flyghtt_backend.repositories.ApprovalStatusRequest;
 import com.flyghtt.flyghtt_backend.services.BusinessService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -74,18 +77,32 @@ public class BusinessController {
         return businessService.deleteBusiness(businessId);
     }
 
-    @Operation(summary = "Add business employee")
-    @PostMapping("{businessId}/employee")
-    public AppResponse addEmployees(@PathVariable UUID businessId, @RequestBody AddEmployeeRequest request) {
+    @Operation(summary = "Add business collaborator")
+    @PostMapping("{businessId}/collaborator")
+    public AppResponse requestCollaborator(@PathVariable UUID businessId, @RequestBody Set<AddCollaboratorRequest> request) {
 
-        return businessService.addEmployees(businessId, request);
+        return businessService.requestCollaborator(businessId, request);
     }
 
-    @Operation(summary = "Remove employee")
-    @DeleteMapping("{businessId}/employee")
-    public AppResponse removeEmployees(@PathVariable UUID businessId, @RequestBody AddEmployeeRequest request) {
+    @Operation(summary = "Remove collaborator")
+    @DeleteMapping("{businessId}/collaborator")
+    public AppResponse removeCollaborator(@PathVariable UUID businessId, @RequestBody CollaboratorIdRequest request) {
 
-        return businessService.removeEmployees(businessId, request);
+        return businessService.removeCollaborator(businessId, request);
+    }
+
+    @Operation(summary = "User joining business after request has been sent")
+    @PostMapping("{businessId}/join")
+    public AppResponse joinBusiness(@PathVariable UUID businessId, @RequestBody ApprovalStatusRequest status) {
+
+        return businessService.joinBusiness(businessId, status.getApprovalStatus());
+    }
+
+    @Operation(summary = "User leaving business")
+    @DeleteMapping("{businessId}/leave")
+    public AppResponse leaveBusiness(@PathVariable UUID businessId) {
+
+        return businessService.leaveBusiness(businessId);
     }
 
     @Operation(summary = "Adding values to tool for a business")
