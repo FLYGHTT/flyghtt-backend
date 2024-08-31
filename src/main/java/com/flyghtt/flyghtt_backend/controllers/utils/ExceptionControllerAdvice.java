@@ -19,7 +19,7 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler({EntityNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public AppResponse handleUserNotFoundException(EntityNotFoundException exception) {
+    public AppResponse handleEntityNotFoundException(EntityNotFoundException exception) {
 
         log.error("An error occurred while handling your request " + exception);
         return AppResponse.builder()
@@ -57,17 +57,6 @@ public class ExceptionControllerAdvice {
         log.error("An error occurred while handling your request " + exception);
         return AppResponse.builder()
                 .status(HttpStatus.BAD_REQUEST)
-                .message(exception.getMessage())
-                .build();
-    }
-
-    @ExceptionHandler({EntityNotFoundException.class})
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public AppResponse handleEntityNotFoundException(EntityNotFoundException exception) {
-
-        log.error("An error occurred while handling your request " + exception);
-        return AppResponse.builder()
-                .status(HttpStatus.NOT_FOUND)
                 .message(exception.getMessage())
                 .build();
     }
