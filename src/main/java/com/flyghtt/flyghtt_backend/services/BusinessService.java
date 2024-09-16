@@ -9,7 +9,6 @@ import com.flyghtt.flyghtt_backend.models.entities.Business;
 import com.flyghtt.flyghtt_backend.models.entities.BusinessCollaborator;
 import com.flyghtt.flyghtt_backend.models.entities.BusinessCollaboratorRequest;
 import com.flyghtt.flyghtt_backend.models.entities.BusinessTool;
-import com.flyghtt.flyghtt_backend.models.entities.BusinessToolValue;
 import com.flyghtt.flyghtt_backend.models.entities.User;
 import com.flyghtt.flyghtt_backend.models.requests.AddCollaboratorRequest;
 import com.flyghtt.flyghtt_backend.models.requests.BusinessRequest;
@@ -169,32 +168,34 @@ public class BusinessService {
     @Transactional
     public IdResponse createBusinessTool(UUID businessId, UUID toolId, BusinessToolRequest request) {
 
-        BusinessTool businessTool = BusinessTool.builder()
-                        .businessId(businessId)
-                                .toolId(toolId)
-                                        .name(request.getBusinessToolName().toUpperCase())
-                                                .build();
+//        BusinessTool businessTool = BusinessTool.builder()
+//                        .businessId(businessId)
+//                                .toolId(toolId)
+//                                        .name(request.getBusinessToolName().toUpperCase())
+//                                                .build();
+//
+//        businessToolRepository.save(businessTool);
+//
+//        List<BusinessToolValue> businessToolValues = new ArrayList<>();
+//
+//        request.getToolValues().forEach(
+//                toolValue ->
+//                    businessToolValues.add(BusinessToolValue.builder()
+//                            .businessToolId(businessTool.getBusinessToolId())
+//                            .factorId(toolValue.getFactorId())
+//                            .value(toolValue.getValue())
+//                            .build())
+//                );
+//
+//        businessTool.setBusinessToolValues(businessToolValues);
+//
+//        businessToolRepository.save(businessTool);
+//
+//        return IdResponse.builder()
+//                .id(businessTool.getBusinessToolId())
+//                .message("Business tool has been successfully created (Business Tool Id)").build();
 
-        businessToolRepository.save(businessTool);
-
-        List<BusinessToolValue> businessToolValues = new ArrayList<>();
-
-        request.getToolValues().forEach(
-                toolValue ->
-                    businessToolValues.add(BusinessToolValue.builder()
-                            .businessToolId(businessTool.getBusinessToolId())
-                            .factorId(toolValue.getFactorId())
-                            .value(toolValue.getValue())
-                            .build())
-                );
-
-        businessTool.setBusinessToolValues(businessToolValues);
-
-        businessToolRepository.save(businessTool);
-
-        return IdResponse.builder()
-                .id(businessTool.getBusinessToolId())
-                .message("Business tool has been successfully created (Business Tool Id)").build();
+        return null;
     }
 
     public List<BusinessTool> getBusinessToolsByBusinessId(UUID businessId) {

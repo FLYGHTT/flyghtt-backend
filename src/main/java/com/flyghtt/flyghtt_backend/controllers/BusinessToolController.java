@@ -29,7 +29,8 @@ public class BusinessToolController {
     @GetMapping("{businessToolId}/values")
     public List<BusinessToolValueResponse> getBusinessToolValueResponseByBusinessTool(@PathVariable UUID businessToolId) {
 
-        return businessToolService.getBusinessToolValueResponseByBusinessTool(businessToolId);
+//        return businessToolService.getBusinessToolValueResponseByBusinessTool(businessToolId);
+        return null;
     }
 
     @Operation(summary = "update business tool values")

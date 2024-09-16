@@ -13,5 +13,5 @@ public interface ToolRepository extends JpaRepository<Tool, UUID> {
     boolean existsByCreatedBy(UUID createdBy);
     List<Tool> findAllByCreatedBy(UUID createdBy);
     void deleteByToolId(UUID toolId);
-    boolean existsByNameAndIsPublicTrue(String name);
+    boolean existsByNameAndIsPublicTrueAndToolIdNot(String name, UUID toolId);
 }
