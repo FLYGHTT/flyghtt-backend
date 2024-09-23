@@ -5,11 +5,11 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     username: ${DB_USER:user}
-    password: ${DB_PASSWORD:s2fohpM6HkgeK3kr327ZSU7PL61gt6Yo}
-    name: ${DB_NAME:flyghtt_db_pzao}
+    password: ${DB_PASSWORD:qD6IucphCx9LyneIexqoIJUCT4xeNiaI}
+    name: ${DB_NAME:flyghtt_db_xw28}
     hikari:
       schema: ${DB_SCHEMA:flyghtt_db}
-    url: jdbc:postgresql://${DB_HOST:dpg-cromko9u0jms73cbppd0-a.oregon-postgres.render.com}:${DB_PORT:5432}/${spring.datasource.name}?currentSchema=${spring.datasource.hikari.schema},public
+    url: jdbc:postgresql://${DB_HOST:dpg-crouvklsvqrc739lp30g-a.oregon-postgres.render.com}:${DB_PORT:5432}/${spring.datasource.name}?currentSchema=${spring.datasource.hikari.schema},public
 
   flyway:
     enabled: true
