@@ -33,6 +33,8 @@ public class Tool {
     @Builder.Default private boolean commentable = true;
     @Builder.Default private boolean isPublic = true;
 
+    private String columns;
+
     @ManyToMany(mappedBy = "likedTools")
     private Set<User> likedUsers;
 
@@ -45,6 +47,7 @@ public class Tool {
                 .link(link)
                 .createdBy(createdBy)
                 .commentable(commentable)
+                .columns(columns)
                 .build();
     }
 

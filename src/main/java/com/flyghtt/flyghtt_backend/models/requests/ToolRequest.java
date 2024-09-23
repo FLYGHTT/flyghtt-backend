@@ -17,6 +17,8 @@ public class ToolRequest {
     private String link;
     private boolean commentable;
     private boolean isPublic;
+    @NotNull
+    private String columns;
 
     public Tool toDb() {
 
@@ -27,6 +29,7 @@ public class ToolRequest {
                 .commentable(commentable)
                 .isPublic(isPublic)
                 .createdBy(UserUtil.getLoggedInUser().get().getUserId())
+                .columns(columns)
                 .build();
     }
 }
