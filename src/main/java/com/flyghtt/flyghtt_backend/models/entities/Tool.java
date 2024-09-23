@@ -48,6 +48,7 @@ public class Tool {
                 .createdBy(createdBy)
                 .commentable(commentable)
                 .columns(columns)
+                .isPublic(isPublic)
                 .build();
     }
 

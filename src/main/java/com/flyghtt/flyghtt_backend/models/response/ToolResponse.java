@@ -16,4 +16,5 @@ public class ToolResponse {
     private UUID createdBy;
     private boolean commentable;
     private String columns;
+    private boolean isPublic;
 }
