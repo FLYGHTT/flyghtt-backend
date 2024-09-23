@@ -15,4 +15,5 @@ public class ToolResponse {
     private String link;
     private UUID createdBy;
     private boolean commentable;
+    private String columns;
 }
